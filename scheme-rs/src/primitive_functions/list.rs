@@ -7,6 +7,7 @@ use itertools::Itertools;
 use crate::environment::{Bindings, Env, Port, Ports};
 use crate::error::{Arity, LispError, LispResult};
 use crate::lisp_val::{Func, LispVal};
+use crate::primitive_functions::boolean::{and, not};
 use crate::primitive_functions::util::check_arity;
 use crate::primitive_functions::util::mk_prim_fn_binding;
 
@@ -105,6 +106,12 @@ fn is_list(args: Vec<LispVal>) -> LispResult<LispVal> {
         [LispVal::List(_)] => Ok(LispVal::Bool(true)),
         _ => Ok(LispVal::Bool(true)),
     }
+}
+
+fn atom(args: Vec<LispVal>) -> LispResult<LispVal> {
+    let not_pair = not(vec![is_pair(args.clone())?])?;
+    let not_empty = not(vec![is_empty(args)?])?;
+    and(vec![not_pair, not_empty])
 }
 
 fn length(args: Vec<LispVal>) -> LispResult<LispVal> {
@@ -315,6 +322,7 @@ pub fn list_primitives() -> Bindings {
         mk_prim_fn_binding("append", append),
         mk_prim_fn_binding("reverse", reverse),
         mk_prim_fn_binding("member", member),
+        mk_prim_fn_binding("atom?", atom),
     ]);
     bindings.extend(accessors());
     bindings

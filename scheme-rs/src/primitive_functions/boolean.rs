@@ -14,7 +14,7 @@ fn is_boolean(args: Vec<LispVal>) -> LispResult<LispVal> {
     }
 }
 
-fn and(args: Vec<LispVal>) -> LispResult<LispVal> {
+pub fn and(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::Min(1))?;
     for (i, val) in args.iter().enumerate() {
         if i == args.len() - 1 {
@@ -27,7 +27,7 @@ fn and(args: Vec<LispVal>) -> LispResult<LispVal> {
     Ok(LispVal::Bool(true))
 }
 
-fn or(args: Vec<LispVal>) -> LispResult<LispVal> {
+pub fn or(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::Min(1))?;
     for (i, val) in args.iter().enumerate() {
         if i == args.len() - 1 {
@@ -40,7 +40,7 @@ fn or(args: Vec<LispVal>) -> LispResult<LispVal> {
     Ok(LispVal::Bool(false))
 }
 
-fn not(args: Vec<LispVal>) -> LispResult<LispVal> {
+pub fn not(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match args[..] {
         [LispVal::Bool(false)] => Ok(LispVal::Bool(true)),
