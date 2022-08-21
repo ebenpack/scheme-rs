@@ -103,6 +103,31 @@ mod tests {
     }
 
     #[test]
+    fn test_little_schemer() {
+        let t = Thingus::new(Box::new(noop));
+
+        let tests = vec![
+            ("(atom? (quote ()))", "#f"),
+            ("(atom? 'atom)", "#t")  ,
+            ("(atom? 1729)", "#t") ,
+            ("(list? '(atom))", "#t")  ,
+            ("(list? '(atom turkey or))", "#t"),
+            ("(list? '((atom turkey) or))", "#t"),
+            ("(list? '())", "#t"),
+            ("(atom? '())", "#f"),
+            ("(car '(a b c))", "a"),
+            ("(car '((a b c) x y z))", "(a b c)"),
+            ("(car '(((hotdogs)) (and) (pickle) relish))", "((hotdogs))"),
+            ("(car (car '(((hotdogs)) (and) (pickle) relish)))", "(hotdogs)"),
+            ("(cdr '(a b c))", "(b c)"),
+            ("(cdr '(hamburger))", "()"),
+        ];
+        for (expr, expected) in tests {
+            assert_eq!(t.eval(expr), expected)
+        }
+    }
+
+    #[test]
     fn eval_lambda() {
         let t = Thingus::new(Box::new(noop));
         let input = concat!(
@@ -162,25 +187,25 @@ mod tests {
         let t = Thingus::new(Box::new(noop));
         assert_eq!(t.eval(input), "#(a a a 9 a)");
 
-        let mut s = Rc::new(RefCell::new(vec![]));
+        let s = Rc::new(RefCell::new(vec![]));
         let cs = s.clone();
         let f = move |port: &mut Vec<LispVal>| {
             let mut s = cs.as_ref().borrow_mut();
             s.extend(port.drain(0..));
         };
 
-        let input = concat!(
-            "(define temp (make-vector 5 'a))",
-            "(define (mut v i val) ",
-            "    (vector-set! v i val)",
-            "    (write temp)",
-            "    (write v)",
-            "    v)",
-            "(define (foo a b) (write a) (write b))",
-            "(foo '(1 2 3) 2)",
-            "(define temp2 temp)",
-            "(mut temp 4 6)",
-        );
+        let input = "
+            (define temp (make-vector 5 'a))
+            (define (mut v i val) 
+                (vector-set! v i val)
+                (write temp)
+                (write v)
+                v)
+            (define (foo a b) (write a) (write b))
+            (foo '(1 2 3) 2)
+            (define temp2 temp)
+            (mut temp 4 6)
+        ";
         let t = Thingus::new(Box::new(f));
         t.eval(input);
         let s = s.borrow();
