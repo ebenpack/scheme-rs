@@ -152,7 +152,7 @@ fn get_tails(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{rc::Rc};
+    use std::rc::Rc;
 
     #[test]
     fn test_get_head() {
@@ -407,7 +407,9 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
                 };
                 let mut vec = (*vec).clone();
                 let _ = std::mem::replace(&mut vec[n], object.clone());
-                if let LispVal::Atom(var) = var {env.bind(var, LispVal::Vector(Rc::new(vec)));}
+                if let LispVal::Atom(var) = var {
+                    env.bind(var, LispVal::Vector(Rc::new(vec)));
+                }
                 Ok(LispVal::Void)
             }
             // eval env (List (Atom "vector-set!":args)) =

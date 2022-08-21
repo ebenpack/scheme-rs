@@ -10,10 +10,7 @@ fn atom_displays() {
 
 #[test]
 fn list_displays() {
-    assert_eq!(
-        format!("{}", LispVal::List(Rc::new(vec![]))),
-        "()"
-    );
+    assert_eq!(format!("{}", LispVal::List(Rc::new(vec![]))), "()");
     assert_eq!(
         format!(
             "{}",
