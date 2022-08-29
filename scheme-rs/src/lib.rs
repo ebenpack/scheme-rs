@@ -1,3 +1,5 @@
+use error::LispResult;
+
 use crate::{
     environment::{Env, Port, Ports},
     lisp_val::LispVal,
@@ -40,6 +42,11 @@ impl Thingus {
             // TODO
             Err(err) => format!("{}", err),
         }
+    }
+    pub fn eval_blah(&self, input: &str) -> LispResult<Vec<LispVal>> {
+        // TODO: ??
+        let (_, parsed) = parser::expression_list(input).unwrap();
+        eval::eval_expression_list(&self.env, parsed)
     }
 }
 
@@ -104,26 +111,33 @@ mod tests {
 
     #[test]
     fn test_little_schemer() {
+        use std::env;
+        use std::fs::File;
+        use std::io::prelude::*;
+        use std::path::Path;
+
         let t = Thingus::new(Box::new(noop));
 
-        let tests = vec![
-            ("(atom? (quote ()))", "#f"),
-            ("(atom? 'atom)", "#t")  ,
-            ("(atom? 1729)", "#t") ,
-            ("(list? '(atom))", "#t")  ,
-            ("(list? '(atom turkey or))", "#t"),
-            ("(list? '((atom turkey) or))", "#t"),
-            ("(list? '())", "#t"),
-            ("(atom? '())", "#f"),
-            ("(car '(a b c))", "a"),
-            ("(car '((a b c) x y z))", "(a b c)"),
-            ("(car '(((hotdogs)) (and) (pickle) relish))", "((hotdogs))"),
-            ("(car (car '(((hotdogs)) (and) (pickle) relish)))", "(hotdogs)"),
-            ("(cdr '(a b c))", "(b c)"),
-            ("(cdr '(hamburger))", "()"),
-        ];
-        for (expr, expected) in tests {
-            assert_eq!(t.eval(expr), expected)
+        let schemer_tests = format!(
+            "{}/tests/little_schemer.scm",
+            env::var("CARGO_MANIFEST_DIR").unwrap()
+        );
+
+        let schemer_tests_path = Path::new(&schemer_tests);
+
+        let mut file = String::new();
+        File::open(&schemer_tests_path)
+            .unwrap()
+            .read_to_string(&mut file)
+            .unwrap();
+
+        for result in t
+            .eval_blah(&file)
+            .unwrap()
+            .iter()
+            .filter(|&val| *val != LispVal::Void)
+        {
+            assert_eq!(result, &LispVal::Bool(true));
         }
     }
 
@@ -177,7 +191,7 @@ mod tests {
         assert_eq!(t.eval(input), "15\n(2 4 6 8 10)\n(2 4 6 8 10)\n35\n#t\n#f");
     }
 
-    #[test]
+    // #[test]
     fn stuff_vector_set() {
         let input = concat!(
             "(define temp (make-vector 5 'a))",

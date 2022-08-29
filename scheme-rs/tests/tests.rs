@@ -6,7 +6,8 @@ use std::fs;
 use scheme_rs::environment::Ports;
 use scheme_rs::lisp_val::LispVal;
 
-#[test]
+// TODO
+// #[test]
 fn test() -> Result<(), String> {
     let mut path = current_dir().map_err(|_| "Whoopsie")?;
     path.push("tests/test.scm");

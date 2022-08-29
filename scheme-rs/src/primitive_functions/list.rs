@@ -321,7 +321,7 @@ pub fn list_primitives() -> Bindings {
         mk_prim_fn_binding("length", length),
         mk_prim_fn_binding("append", append),
         mk_prim_fn_binding("reverse", reverse),
-        mk_prim_fn_binding("member", member),
+        mk_prim_fn_binding("member?", member),
         mk_prim_fn_binding("atom?", atom),
     ]);
     bindings.extend(accessors());
