@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use itertools::Itertools;
 
-use crate::environment::{Bindings, Env, Port, Ports};
+use crate::environment::{Bindings, Env, Ports};
 use crate::error::{Arity, LispError, LispResult};
 use crate::lisp_val::{Func, LispVal};
 use crate::primitive_functions::boolean::{and, not};

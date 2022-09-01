@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
@@ -81,7 +80,7 @@ impl fmt::Display for LispVal {
         fn format_list(xs: &[LispVal]) -> String {
             let result = xs
                 .iter()
-                .map(|x| format_helper(x))
+                .map(format_helper)
                 .collect::<Vec<String>>()
                 .join(" ");
             result

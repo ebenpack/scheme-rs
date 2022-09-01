@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use wasm_bindgen::prelude::*;
 
 use crate::lisp_val::LispVal;
@@ -45,12 +45,9 @@ impl Ports {
         self.0.get(port).cloned()
     }
     pub fn signal(&self, port: &str) {
-        match self.get(port) {
-            Some(port) => {
-                let mut port = port.as_ref().borrow_mut();
-                port.signal()
-            }
-            _ => (),
+        if let Some(port) = self.get(port) {
+            let mut port = port.as_ref().borrow_mut();
+            port.signal()
         }
     }
 }

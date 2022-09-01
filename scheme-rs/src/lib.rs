@@ -1,7 +1,7 @@
 use error::LispResult;
 
 use crate::{
-    environment::{Env, Port, Ports},
+    environment::{Env, Ports},
     lisp_val::LispVal,
     primitive_functions::primitive_functions,
 };
@@ -76,7 +76,7 @@ pub fn eval(input: &str, ports: Ports) -> String {
 #[cfg(test)]
 mod tests {
 
-    use std::{borrow::BorrowMut, cell::RefCell, ops::Deref, rc::Rc};
+    use std::{cell::RefCell, ops::Deref, rc::Rc};
 
     use super::*;
 
