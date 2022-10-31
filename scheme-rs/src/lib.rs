@@ -30,7 +30,7 @@ impl Thingus {
         let parsed = parser::expression_list(input);
         match parsed {
             // TODO: Consume all input
-            Ok((input, exprs)) => match eval::eval_expression_list(&self.env, exprs) {
+            Ok((_input, exprs)) => match eval::eval_expression_list(&self.env, exprs) {
                 Ok(result) => result
                     .iter()
                     .filter(|&val| *val != LispVal::Void)
@@ -54,7 +54,7 @@ pub fn eval(input: &str, ports: Ports) -> String {
     let parsed = parser::expression_list(input);
     match parsed {
         // TODO: Consume all input
-        Ok((input, exprs)) => {
+        Ok((_input, exprs)) => {
             let primitive_bindings = primitive_functions();
             let env = Env::with_bindings(primitive_bindings, ports);
 
@@ -110,6 +110,47 @@ mod tests {
     }
 
     #[test]
+    fn function_equality() {
+        let t = Thingus::new(Box::new(noop));
+
+        // eq use funcs
+        let thingy = concat!(
+            "(define (foo b) b)",
+            "(define bar foo)",
+            "(and (eq? foo bar) (eq? foo foo) (eq? bar bar))",
+        );
+
+        assert_eq!(t.eval(thingy), "#t");
+
+        // neq user funcs
+        let t = Thingus::new(Box::new(noop));
+        let thingy = concat!(
+            "(define (foo b) b)",
+            "(define (bar b) b)",
+            "(eq? foo bar)",
+        );
+
+        assert_eq!(t.eval(thingy), "#f");
+
+        // eq prim funcs
+        let t = Thingus::new(Box::new(noop));
+        let thingy = concat!(
+            "(define foo eq?)",
+            "(and (eq? eq? eq?) (eq? eq? foo)))",
+        );
+
+        assert_eq!(t.eval(thingy), "#t");
+
+        // neq prim funcs
+        let t = Thingus::new(Box::new(noop));
+        let thingy = concat!(
+            "(eq? eq? eq?)",
+        );
+
+        assert_eq!(t.eval(thingy), "#t");
+    }
+
+    #[test]
     fn test_little_schemer() {
         use std::env;
         use std::fs::File;
@@ -131,12 +172,15 @@ mod tests {
             .read_to_string(&mut file)
             .unwrap();
 
-        for result in t
-            .eval_blah(&file)
-            .unwrap()
-            .iter()
-            .filter(|&val| *val != LispVal::Void)
-        {
+        let results = t.eval_blah(&file).unwrap();
+
+        // Kind of a hack for now, but the last expression of the test file will be 'OK
+        // and we'll assert this to ensure we've parsed the entire file successfully
+        assert_eq!(results.last().unwrap(), &LispVal::Atom("OK".to_string()));
+
+        let results = results.iter().take(results.len() - 1);
+
+        for result in results.filter(|&val| *val != LispVal::Void) {
             assert_eq!(result, &LispVal::Bool(true));
         }
     }

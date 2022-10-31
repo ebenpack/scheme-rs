@@ -1,5 +1,6 @@
 use std::fmt;
 use std::rc::Rc;
+use uuid::Uuid;
 
 use crate::environment::Env;
 use crate::error::LispResult;
@@ -28,10 +29,22 @@ pub fn prim_func(name: String, func: fn(Vec<LispVal>) -> LispResult<LispVal>) ->
 #[derive(Clone)]
 pub struct Func {
     pub name: String,
+    pub id: u128,
     pub params: Vec<String>,
     pub varargs: Option<String>,
     pub body: Vec<LispVal>,
     pub closure: Env,
+}
+
+impl Func {
+    pub fn new(name: String, params: Vec<String>, varargs: Option<String>, body: Vec<LispVal>, closure: Env) -> Self {
+        let id = Uuid::new_v4().as_u128();
+        Self { name, id, params, varargs, body, closure }
+    }
+
+    pub fn ctx(&self) -> &Env {
+        &self.closure
+    }
 }
 
 impl fmt::Debug for Func {
@@ -47,14 +60,7 @@ impl fmt::Debug for Func {
 
 impl PartialEq for Func {
     fn eq(&self, other: &Func) -> bool {
-        // TODO
-        false
-    }
-}
-
-impl Func {
-    pub fn ctx(&self) -> &Env {
-        &self.closure
+        self.id == other.id
     }
 }
 

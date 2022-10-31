@@ -1,35 +1,37 @@
 use std::collections::HashMap;
 use std::iter;
 
+use macros::string_to_bool_binop;
+
 use crate::environment::Bindings;
 use crate::error::{Arity, LispError, LispResult};
 use crate::lisp_val::LispVal;
 use crate::primitive_functions::util::check_arity;
 use crate::primitive_functions::util::mk_prim_fn_binding;
 
-#[macros::string_to_bool_binop("string=?")]
+#[string_to_bool_binop("string=?")]
 fn string_eq(args: Vec<LispVal>) -> LispResult<LispVal> {
-    s1 != s2
+    s1 == s2
 }
 
-#[macros::string_to_bool_binop("string<?")]
+#[string_to_bool_binop("string<?")]
 fn string_lt(args: Vec<LispVal>) -> LispResult<LispVal> {
-    s1 >= s2
+    s1 < s2
 }
 
-#[macros::string_to_bool_binop("string>?")]
+#[string_to_bool_binop("string>?")]
 fn string_gt(args: Vec<LispVal>) -> LispResult<LispVal> {
-    s1 <= s2
-}
-
-#[macros::string_to_bool_binop("string<=?")]
-fn string_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
     s1 > s2
 }
 
-#[macros::string_to_bool_binop("string>=?")]
+#[string_to_bool_binop("string<=?")]
+fn string_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
+    s1 <= s2
+}
+
+#[string_to_bool_binop("string>=?")]
 fn string_gte(args: Vec<LispVal>) -> LispResult<LispVal> {
-    s1 < s2
+    s1 >= s2
 }
 
 fn is_string(args: Vec<LispVal>) -> LispResult<LispVal> {

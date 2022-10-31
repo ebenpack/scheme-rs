@@ -211,6 +211,7 @@ fn extract_var(val: &LispVal) -> LispResult<String> {
     }
 }
 
+// TODO: Could eval consume val?
 pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
     let val_clone = val.clone();
     match val {
@@ -271,13 +272,13 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
                     [LispVal::Atom(name), ref params @ ..] => {
                         env.bind(
                             name,
-                            LispVal::Func(Func {
-                                name: name.to_string(),
-                                params: params.iter().map(|param| format!("{}", param)).collect(),
-                                varargs: None, // TODO?
-                                body: body.to_owned(),
-                                closure: env.clone(),
-                            }),
+                            LispVal::Func(Func::new(
+                                name.to_string(),
+                                params.iter().map(|param| format!("{}", param)).collect(),
+                                None, // TODO?
+                                body.to_owned(),
+                                env.clone(),
+                            )),
                         );
                         Ok(LispVal::Void)
                     }
@@ -286,35 +287,35 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
             }
 
             [LispVal::Atom(ref s), LispVal::List(params), body @ ..] if s == "lambda" => {
-                Ok(LispVal::Func(Func {
-                    name: "λ".to_string(),
-                    params: params.iter().map(|val| format!("{}", val)).collect(),
-                    varargs: None,
-                    body: body.to_vec(),
-                    closure: env.clone(),
-                }))
+                Ok(LispVal::Func(Func::new(
+                    "λ".to_string(),
+                    params.iter().map(|val| format!("{}", val)).collect(),
+                    None,
+                    body.to_vec(),
+                    env.clone(),
+                )))
             }
 
             [LispVal::Atom(ref s), varargs @ LispVal::Atom(_), body @ ..] if s == "lambda" => {
-                Ok(LispVal::Func(Func {
-                    name: "λ".to_string(),
-                    params: vec![],
-                    varargs: Some(format!("{}", varargs)),
-                    body: body.to_vec(),
-                    closure: env.clone(),
-                }))
+                Ok(LispVal::Func(Func::new(
+                    "λ".to_string(),
+                    vec![],
+                    Some(format!("{}", varargs)),
+                    body.to_vec(),
+                    env.clone(),
+                )))
             }
 
             [LispVal::Atom(ref s), LispVal::DottedList(params, varargs), body @ ..]
                 if s == "lambda" =>
             {
-                Ok(LispVal::Func(Func {
-                    name: "λ".to_string(),
-                    params: params.iter().map(|val| format!("{}", val)).collect(),
-                    varargs: Some(format!("{}", varargs)),
-                    body: body.to_vec(),
-                    closure: env.clone(),
-                }))
+                Ok(LispVal::Func(Func::new(
+                    "λ".to_string(),
+                    params.iter().map(|val| format!("{}", val)).collect(),
+                    Some(format!("{}", varargs)),
+                    body.to_vec(),
+                    env.clone(),
+                )))
             }
 
             [LispVal::Atom(ref s), LispVal::List(pairs), body @ ..] if s == "let" => {

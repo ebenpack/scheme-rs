@@ -66,14 +66,14 @@ impl fmt::Display for LispError {
 pub type LispResult<T> = Result<T, LispError>;
 
 impl<'a> From<(&'a [u8], ErrorKind)> for LispError {
-    fn from((i, ek): (&'a [u8], ErrorKind)) -> Self {
+    fn from((_input, _kind): (&'a [u8], ErrorKind)) -> Self {
         // TODO
         LispError::Parser("Error".to_string())
     }
 }
 
 impl<I> ParseError<I> for LispError {
-    fn from_error_kind(input: I, kind: ErrorKind) -> Self {
+    fn from_error_kind(_input: I, _kind: ErrorKind) -> Self {
         // TODO
         LispError::Parser("Error".to_string())
     }

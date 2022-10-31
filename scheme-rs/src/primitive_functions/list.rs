@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::iter;
 use std::rc::Rc;
@@ -104,7 +105,41 @@ fn is_list(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
         [LispVal::List(_)] => Ok(LispVal::Bool(true)),
-        _ => Ok(LispVal::Bool(true)),
+        [LispVal::DottedList(_, tail)] => {
+            // TODO: Is this correct?
+            let tail: &LispVal = tail.borrow();
+            is_list(vec![tail.clone()])
+        },
+        _ => Ok(LispVal::Bool(false)),
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use super::{LispVal};
+    use super::*;
+    use std::rc::Rc;
+
+
+    #[test]
+    fn stuff_and_junk() {
+        // TODO: Remove
+        assert_eq!(
+            is_list(vec![LispVal::DottedList(
+                Rc::new(vec![LispVal::Atom("aa".to_string())]),
+                Rc::new(LispVal::Atom("aa".to_string())), 
+            )]),
+            Ok(LispVal::Bool(false))
+        );
+        assert_eq!(
+            is_list(vec![LispVal::DottedList(
+                Rc::new(vec![LispVal::Atom("aa".to_string())]),
+                Rc::new(LispVal::List(Rc::new(vec![LispVal::Atom("aa".to_string())]))), 
+            )]),
+            Ok(LispVal::Bool(true))
+        );
     }
 }
 
@@ -288,19 +323,19 @@ pub fn accessors() -> Bindings {
             let accessor_string = format!("c{}r", accessor.iter().join(""));
             (
                 accessor_string.clone(),
-                LispVal::Func(Func {
-                    name: accessor_string,
-                    params: vec!["xs".to_string()],
-                    varargs: None,
-                    body: make_accessor(accessor),
-                    closure: Env::with_bindings(
+                LispVal::Func(Func::new(
+                    accessor_string,
+                    vec!["xs".to_string()],
+                    None,
+                    make_accessor(accessor),
+                    Env::with_bindings(
                         HashMap::from_iter([
                             mk_prim_fn_binding("car", car),
                             mk_prim_fn_binding("cdr", cdr),
                         ]),
                         Ports::new(Box::new(noop)),
                     ),
-                }),
+                )),
             )
         })
         .collect::<Vec<(String, LispVal)>>();

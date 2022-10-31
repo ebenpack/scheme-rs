@@ -7,12 +7,10 @@ use scheme_rs::environment::Ports;
 use scheme_rs::lisp_val::LispVal;
 
 // TODO
-// #[test]
+#[test]
 fn test() -> Result<(), String> {
     let mut path = current_dir().map_err(|_| "Whoopsie")?;
     path.push("tests/test.scm");
-    println!("{:?}", path);
-    // TODO: Feels kinda hacky
     let contents = fs::read_to_string(path).map_err(|_| "Something went wrong reading the file")?;
 
     for result in scheme_rs::eval(

@@ -52,6 +52,8 @@ fn eq(args: Vec<LispVal>) -> LispResult<LispVal> {
             }
             Ok(LispVal::Bool(true))
         }
+        [LispVal::Func(f), LispVal::Func(g)] => Ok(LispVal::Bool(f == g)),
+        [LispVal::PrimitiveFunc(f), LispVal::PrimitiveFunc(g)] => Ok(LispVal::Bool(f == g)),
         [_, _] => Ok(LispVal::Bool(false)),
 
         _ => unreachable!(),

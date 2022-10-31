@@ -47,7 +47,7 @@ pub fn string_to_bool_binop(args: TokenStream, stream: TokenStream) -> TokenStre
                                     ss = Some(s2);
                                 },
                                 Some(s1) => {
-                                     if #(#stmts)* {
+                                     if !(#(#stmts)*) {
                                         return Ok(LispVal::Bool(false))
                                      }
                                      ss = Some(s2);

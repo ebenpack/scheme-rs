@@ -25,13 +25,13 @@ fn list_displays() {
                         func: |_| Ok(LispVal::Nil),
                         name: "foo".to_string()
                     }),
-                    LispVal::Func(Func {
-                        name: "foo".to_string(),
-                        params: vec![],
-                        varargs: None,
-                        body: vec![],
-                        closure: Env::new()
-                    })
+                    LispVal::Func(Func::new(
+                        "foo".to_string(),
+                        vec![],
+                        None,
+                        vec![],
+                        Env::new()
+                    ))
                 ])),
                 LispVal::List(Rc::new(vec![])),
             ]))
@@ -72,13 +72,13 @@ fn lambda_displays() {
     assert_eq!(
         format!(
             "{}",
-            LispVal::Func(Func {
-                name: "foo".to_string(),
-                params: vec![],
-                varargs: None,
-                body: vec![],
-                closure: Env::new()
-            })
+            LispVal::Func(Func::new(
+                "foo".to_string(),
+                vec![],
+                None,
+                vec![],
+                Env::new()
+            ))
         ),
         "#<procedure:foo>"
     );
