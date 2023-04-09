@@ -37,9 +37,22 @@ pub struct Func {
 }
 
 impl Func {
-    pub fn new(name: String, params: Vec<String>, varargs: Option<String>, body: Vec<LispVal>, closure: Env) -> Self {
+    pub fn new(
+        name: String,
+        params: Vec<String>,
+        varargs: Option<String>,
+        body: Vec<LispVal>,
+        closure: Env,
+    ) -> Self {
         let id = Uuid::new_v4().as_u128();
-        Self { name, id, params, varargs, body, closure }
+        Self {
+            name,
+            id,
+            params,
+            varargs,
+            body,
+            closure,
+        }
     }
 
     pub fn ctx(&self) -> &Env {

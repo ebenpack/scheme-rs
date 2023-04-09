@@ -124,65 +124,75 @@ mod tests {
 
         // neq user funcs
         let t = Thingus::new(Box::new(noop));
-        let thingy = concat!(
-            "(define (foo b) b)",
-            "(define (bar b) b)",
-            "(eq? foo bar)",
-        );
+        let thingy = concat!("(define (foo b) b)", "(define (bar b) b)", "(eq? foo bar)",);
 
         assert_eq!(t.eval(thingy), "#f");
 
         // eq prim funcs
         let t = Thingus::new(Box::new(noop));
-        let thingy = concat!(
-            "(define foo eq?)",
-            "(and (eq? eq? eq?) (eq? eq? foo)))",
-        );
+        let thingy = concat!("(define foo eq?)", "(and (eq? eq? eq?) (eq? eq? foo)))",);
 
         assert_eq!(t.eval(thingy), "#t");
 
         // neq prim funcs
         let t = Thingus::new(Box::new(noop));
-        let thingy = concat!(
-            "(eq? eq? eq?)",
-        );
+        let thingy = concat!("(eq? eq? eq?)",);
 
         assert_eq!(t.eval(thingy), "#t");
     }
 
     #[test]
-    fn test_little_schemer() {
+    fn test_little_schemer() -> Result<(), String> {
         use std::env;
         use std::fs::File;
         use std::io::prelude::*;
         use std::path::Path;
 
-        let t = Thingus::new(Box::new(noop));
-
-        let schemer_tests = format!(
-            "{}/tests/little_schemer.scm",
+        let schemer_test_dir_str = format!(
+            "{}/tests/little_schemer/",
             env::var("CARGO_MANIFEST_DIR").unwrap()
         );
+        let schemer_test_dir_path = Path::new(&schemer_test_dir_str);
 
-        let schemer_tests_path = Path::new(&schemer_tests);
+        for test_file_result in schemer_test_dir_path
+            .read_dir()
+            .map_err(|_| "Error reading test directory")?
+        {
+            let schemer_test_path = test_file_result.map_err(|_| "Error reading file")?;
+            if !schemer_test_path
+                .file_name()
+                .into_string()
+                .map_err(|_| "Error converting test file name to string")?
+                .ends_with("test.scm")
+            {
+                continue;
+            }
+            let mut file = String::new();
+            File::open(schemer_test_path.path())
+                .map_err(|_| "Error opening test file")?
+                .read_to_string(&mut file)
+                .map_err(|_| "Error reading test file to string")?;
 
-        let mut file = String::new();
-        File::open(&schemer_tests_path)
-            .unwrap()
-            .read_to_string(&mut file)
-            .unwrap();
+            let t = Thingus::new(Box::new(noop));
+            let results = t
+                .eval_blah(&file)
+                .map_err(|err| format!("Error evaluating test file: {}", err))?;
 
-        let results = t.eval_blah(&file).unwrap();
+            // Kind of a hack for now, but the last expression of the test file will be 'OK
+            // and we'll assert this to ensure we've parsed the entire file successfully
+            assert_eq!(
+                results.last().ok_or("Error retrieving last file result")?,
+                &LispVal::Atom("OK".to_string())
+            );
 
-        // Kind of a hack for now, but the last expression of the test file will be 'OK
-        // and we'll assert this to ensure we've parsed the entire file successfully
-        assert_eq!(results.last().unwrap(), &LispVal::Atom("OK".to_string()));
+            let results = results.iter().take(results.len() - 1);
 
-        let results = results.iter().take(results.len() - 1);
-
-        for result in results.filter(|&val| *val != LispVal::Void) {
-            assert_eq!(result, &LispVal::Bool(true));
+            for result in results.filter(|&val| *val != LispVal::Void) {
+                assert_eq!(result, &LispVal::Bool(true));
+            }
         }
+
+        Ok(())
     }
 
     #[test]

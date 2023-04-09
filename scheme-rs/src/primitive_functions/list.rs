@@ -109,19 +109,17 @@ fn is_list(args: Vec<LispVal>) -> LispResult<LispVal> {
             // TODO: Is this correct?
             let tail: &LispVal = tail.borrow();
             is_list(vec![tail.clone()])
-        },
+        }
         _ => Ok(LispVal::Bool(false)),
     }
 }
 
-
 #[cfg(test)]
 mod tests {
 
-    use super::{LispVal};
+    use super::LispVal;
     use super::*;
     use std::rc::Rc;
-
 
     #[test]
     fn stuff_and_junk() {
@@ -129,14 +127,16 @@ mod tests {
         assert_eq!(
             is_list(vec![LispVal::DottedList(
                 Rc::new(vec![LispVal::Atom("aa".to_string())]),
-                Rc::new(LispVal::Atom("aa".to_string())), 
+                Rc::new(LispVal::Atom("aa".to_string())),
             )]),
             Ok(LispVal::Bool(false))
         );
         assert_eq!(
             is_list(vec![LispVal::DottedList(
                 Rc::new(vec![LispVal::Atom("aa".to_string())]),
-                Rc::new(LispVal::List(Rc::new(vec![LispVal::Atom("aa".to_string())]))), 
+                Rc::new(LispVal::List(Rc::new(vec![LispVal::Atom(
+                    "aa".to_string()
+                )]))),
             )]),
             Ok(LispVal::Bool(true))
         );
