@@ -74,9 +74,9 @@ const main = async () => {
         const input = typeof editor.state.doc === 'string'
             ? editor.state.doc
             : editor.state.doc.sliceString(0);
-        const start = Date.now();
+        const start = performance.now();
         const result = t.eval(input);
-        console.log(`Time: ${Date.now() - start}`)
+        console.log(`Time: ${performance.now() - start}`)
         output.textContent = result;
     });
 };
