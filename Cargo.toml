@@ -36,3 +36,4 @@ wee_alloc = { version = "0.4.5", optional = true }
 opt-level = "s"
 lto = true
 codegen-units = 1
+panic = "abort"
