@@ -143,6 +143,7 @@ mod tests {
 
     #[test]
     fn test_little_schemer() -> Result<(), String> {
+        // TODO: Move this test to the test dir?
         use std::env;
         use std::fs::File;
         use std::io::prelude::*;
@@ -182,7 +183,9 @@ mod tests {
             // and we'll assert this to ensure we've parsed the entire file successfully
             assert_eq!(
                 results.last().ok_or("Error retrieving last file result")?,
-                &LispVal::Atom("OK".to_string())
+                &LispVal::Atom("OK".to_string()),
+                "{}",
+                schemer_test_path.path().display()
             );
 
             let results = results.iter().take(results.len() - 1);
