@@ -15,6 +15,8 @@ use nom::{
     Err, IResult, InputLength, Parser,
 };
 
+pub use super::parse_number::number;
+
 pub fn letter(input: &str) -> IResult<&str, char> {
     one_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")(input)
 }
@@ -345,22 +347,6 @@ pub fn two_dotted_list(input: &str) -> IResult<&str, LispVal> {
         head.insert(0, mid);
         Ok((input, LispVal::List(Rc::new(head))))
     }
-}
-
-pub fn number(input: &str) -> IResult<&str, LispVal> {
-    // TODO: This is just a temporary stub, number parsing
-    // needs to be fleshed out substantially from here
-    let (input, num) = digit1.parse(input)?;
-    let num = match num.parse::<i64>() {
-        Ok(num) => num,
-        Err(_) => {
-            return Err(Err::Error(nom::error::Error::new(
-                "",
-                nom::error::ErrorKind::Digit,
-            )))
-        }
-    };
-    Ok((input, LispVal::Number(num)))
 }
 
 pub fn lists(input: &str) -> IResult<&str, LispVal> {

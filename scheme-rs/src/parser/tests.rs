@@ -99,8 +99,26 @@ fn parse_block_comment() {
 
 #[test]
 fn parse_number() {
+    // Decimal
     assert_eq!(number.parse("1"), Ok(("", LispVal::Number(1))));
     assert_eq!(number.parse("1729"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("+1729"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("-1729"), Ok(("", LispVal::Number(-1729))));
+    assert_eq!(number.parse("#d1729"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#d+1729"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#d-1729"), Ok(("", LispVal::Number(-1729))));
+    // Binary
+    assert_eq!(number.parse("#b11011000001"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#b+11011000001"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#b-11011000001"), Ok(("", LispVal::Number(-1729))));
+    // Octal
+    assert_eq!(number.parse("#o3301"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#o+3301"), Ok(("", LispVal::Number(1729))));
+    assert_eq!(number.parse("#o-3301"), Ok(("", LispVal::Number(-1729))));
+    // Hex
+    assert_eq!(number.parse("#xDEADBEEF"), Ok(("", LispVal::Number(3735928559))));
+    assert_eq!(number.parse("#x+DEADBEEF"), Ok(("", LispVal::Number(3735928559))));
+    assert_eq!(number.parse("#x-DEADBEEF"), Ok(("", LispVal::Number(-3735928559))));
 }
 
 #[test]
