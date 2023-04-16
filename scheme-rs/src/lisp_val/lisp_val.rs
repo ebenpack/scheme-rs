@@ -1,3 +1,5 @@
+use num::complex::Complex64;
+use num::rational::Rational64;
 use std::fmt;
 use std::rc::Rc;
 use uuid::Uuid;
@@ -83,8 +85,10 @@ pub enum LispVal {
     List(Rc<Vec<LispVal>>),
     DottedList(Rc<Vec<LispVal>>, Rc<LispVal>),
     Vector(Rc<Vec<LispVal>>),
-    // TODO: Add Integer, Float, Complex/Rational, etc.
-    Number(i64),
+    Integer(i64),
+    Float(f64),
+    Complex(Complex64),
+    Rational(Rational64),
     String(String),
     Char(char), // TODO: Need this?
     PrimitiveFunc(PrimitiveFunc),
@@ -111,7 +115,10 @@ impl fmt::Display for LispVal {
                 LispVal::List(xs) => format!("({})", format_list(xs)),
                 LispVal::DottedList(h, t) => format!("({} . {})", format_list(h), t),
                 LispVal::Vector(xs) => format!("#({})", format_list(xs)),
-                LispVal::Number(n) => n.to_string(),
+                LispVal::Integer(n) => n.to_string(),
+                LispVal::Float(n) => n.to_string(),
+                LispVal::Complex(n) => n.to_string(),
+                LispVal::Rational(n) => n.to_string(),
                 LispVal::String(s) => format!("\"{}\"", s),
                 LispVal::Char(c) => format_char(c),
                 LispVal::PrimitiveFunc(f) => format!("#<procedure:{}>", f.name),

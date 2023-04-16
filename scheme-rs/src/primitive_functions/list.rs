@@ -153,7 +153,7 @@ fn length(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
         [LispVal::List(xs)] => {
-            Ok(LispVal::Number(xs.len().try_into().map_err(|_| {
+            Ok(LispVal::Integer(xs.len().try_into().map_err(|_| {
                 LispError::GenericError("weird list length".to_string())
             })?))
         }

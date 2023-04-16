@@ -22,7 +22,7 @@ fn eq(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
         [LispVal::Bool(arg1), LispVal::Bool(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
-        [LispVal::Number(arg1), LispVal::Number(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
+        [LispVal::Integer(arg1), LispVal::Integer(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
         [LispVal::String(arg1), LispVal::String(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
         [LispVal::Char(arg1), LispVal::Char(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
         [LispVal::Atom(arg1), LispVal::Atom(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),

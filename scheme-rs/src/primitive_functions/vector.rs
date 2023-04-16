@@ -20,7 +20,7 @@ fn vector_length(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
         [LispVal::Vector(xs)] => {
-            Ok(LispVal::Number(xs.len().try_into().map_err(|_| {
+            Ok(LispVal::Integer(xs.len().try_into().map_err(|_| {
                 LispError::GenericError("weird list length".to_string())
             })?))
         }
@@ -35,7 +35,7 @@ fn vector_length(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn vector_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
-        [v @ LispVal::Vector(xs), LispVal::Number(n)] => {
+        [v @ LispVal::Vector(xs), LispVal::Integer(n)] => {
             let index = usize::try_from(*n)
                 .map_err(|_| LispError::GenericError("weird list length".to_string()))?;
             match xs.get(index ) {
@@ -43,7 +43,7 @@ fn vector_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
                 None => Err(LispError::GenericError(format!("vector-ref: index is out of range\nindex: {}\nvalid range: [0, {}]\nvector: {}", index, xs.len(), v))),
             }
         }
-        [arg, LispVal::Number(_)] => Err(LispError::GenericError(format!(
+        [arg, LispVal::Integer(_)] => Err(LispError::GenericError(format!(
             "vector-ref: contract violation\nexpected: vector?\ngiven: {}",
             arg
         ))),
@@ -58,14 +58,14 @@ fn vector_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn make_vector(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 2))?;
     match &args[..] {
-        [LispVal::Number(n)] => {
+        [LispVal::Integer(n)] => {
             let n = usize::try_from(*n)
                 .map_err(|_| LispError::GenericError("weird vector length".to_string()))?;
             Ok(LispVal::Vector(Rc::new(
                 iter::repeat(LispVal::Void).take(n).collect(),
             )))
         }
-        [LispVal::Number(n), arg] => {
+        [LispVal::Integer(n), arg] => {
             let n = usize::try_from(*n)
                 .map_err(|_| LispError::GenericError("weird vector length".to_string()))?;
             Ok(LispVal::Vector(Rc::new(

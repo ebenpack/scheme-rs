@@ -57,7 +57,7 @@ fn string_to_symbol(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn string_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
-        [LispVal::String(s), LispVal::Number(n)] => {
+        [LispVal::String(s), LispVal::Integer(n)] => {
             let n: usize = usize::try_from(*n).map_err(|_| {
                 LispError::GenericError(format!("string-ref: index is out of range\nindex: {}\nvalid range: [0, {}]\nstring: \"{}\"", n, s.len(), &s))
             })?;
@@ -69,7 +69,7 @@ fn string_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
             }
         },
         [LispVal::String(_), arg] => Err(LispError::GenericError(format!("string-ref: contract violation\nexpected: exact-nonnegative-integer?\ngiven: {}\nargument position: 2nd", arg))),
-        [arg, LispVal::Number(_)] => Err(LispError::GenericError(format!("string-ref: contract violation\nexpected: string?\ngiven: {}\nargument position: 1st", arg))),
+        [arg, LispVal::Integer(_)] => Err(LispError::GenericError(format!("string-ref: contract violation\nexpected: string?\ngiven: {}\nargument position: 1st", arg))),
         _ => unreachable!()
     }
 }
@@ -77,7 +77,7 @@ fn string_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn make_string(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
-        [LispVal::Number(n), LispVal::Char(c)] => {
+        [LispVal::Integer(n), LispVal::Char(c)] => {
             let n: usize = usize::try_from(*n).map_err(|_| {
                 LispError::GenericError(format!("make-string: out of memory making string of length {}", n))
             })?;
@@ -85,7 +85,7 @@ fn make_string(args: Vec<LispVal>) -> LispResult<LispVal> {
                 iter::repeat(c).take(n).collect::<String>()
             ))
         },
-        [LispVal::Number(_), arg] => Err(LispError::GenericError(format!("make-string: contract violation\nexpected: exact-nonnegative-integer?\ngiven: {}\nargument position: 2nd", arg))),
+        [LispVal::Integer(_), arg] => Err(LispError::GenericError(format!("make-string: contract violation\nexpected: exact-nonnegative-integer?\ngiven: {}\nargument position: 2nd", arg))),
         [arg, LispVal::Char(_)] => Err(LispError::GenericError(format!("make-string: contract violation\nexpected: char?\ngiven: {}\nargument position: 1st", arg))),
         _ => unreachable!()
     }
@@ -95,7 +95,7 @@ fn str_len(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
         [LispVal::String(s)] => {
-            Ok(LispVal::Number(s.len().try_into().map_err(|_| {
+            Ok(LispVal::Integer(s.len().try_into().map_err(|_| {
                 LispError::GenericError("weird string length".to_string())
             })?))
         }
@@ -127,7 +127,7 @@ fn str_append(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn substring(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 3))?;
     match &args[..] {
-        [LispVal::String(s), LispVal::Number(n)] => {
+        [LispVal::String(s), LispVal::Integer(n)] => {
             let n: usize = usize::try_from(*n).map_err(|_| {
                 LispError::GenericError(format!("substring: starting index is out of range\nstarting index: {}\nvalid range: [0, {}]\nstring: {}", n, s.len(), &s))
             })?;
@@ -137,7 +137,7 @@ fn substring(args: Vec<LispVal>) -> LispResult<LispVal> {
                 Ok(LispVal::String(s.chars().skip(n).collect()))
             }
         }
-        [LispVal::String(s), LispVal::Number(m), LispVal::Number(n)] => {
+        [LispVal::String(s), LispVal::Integer(m), LispVal::Integer(n)] => {
             let n: usize = usize::try_from(*n).map_err(|_| {
                 LispError::GenericError(format!("substring: starting index is out of range\nstarting index: {}\nvalid range: [0, {}]\nstring: {}", n, s.len(), &s))
             })?;
@@ -165,7 +165,7 @@ fn substring(args: Vec<LispVal>) -> LispResult<LispVal> {
         [arg1, arg2, arg3] => {
             if !matches!(arg1, LispVal::String(_)) {
                 Err(LispError::GenericError(format!("substring: contract violation\nexpected: string?\ngiven: {}\nargument position: 1st", arg2)))
-            } else if !matches!(arg2, LispVal::Number(_)) {
+            } else if !matches!(arg2, LispVal::Integer(_)) {
                 Err(LispError::GenericError(format!("substring: contract violation\nexpected: exact-nonnegative-integer?\ngiven: {}\nargument position: 2nd", arg2)))
             } else {
                 Err(LispError::GenericError(format!("substring: contract violation\nexpected: exact-nonnegative-integer?\ngiven: {}\nargument position: 3rd", arg3)))

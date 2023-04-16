@@ -60,7 +60,7 @@ where
     move |input| {
         let (input, _) = opt(char('+')).parse(input)?;
         let (input, n) = f.parse(input)?;
-        Ok((input, LispVal::Number(n)))
+        Ok((input, LispVal::Integer(n)))
     }
 }
 
@@ -71,7 +71,7 @@ where
     move |input| {
         let (input, _) = char('-').parse(input)?;
         let (input, n) = f.parse(input)?;
-        Ok((input, LispVal::Number(-n)))
+        Ok((input, LispVal::Integer(-n)))
     }
 }
 
@@ -89,6 +89,13 @@ fn integer(input: &str) -> IResult<&str, LispVal> {
 /*--------------
 -- Float
 --------------*/
+
+fn float_helper<F>(input: &str, f: F) -> IResult<&str, LispVal>
+where
+    F: Fn(&str) -> IResult<&str, f64> + Clone,
+{
+    alt((negative_float(f.clone()), positive_float(f))).parse(input)
+}
 
 fn float_decimal(input: &str) -> IResult<&str, LispVal> {
     integer_helper(input, |input| {
@@ -130,31 +137,24 @@ fn float_base(input: &str) -> IResult<&str, LispVal> {
 
 fn positive_float<F>(mut f: F) -> impl FnMut(&str) -> IResult<&str, LispVal>
 where
-    F: Fn(&str) -> IResult<&str, i64>,
+    F: Fn(&str) -> IResult<&str, f64>,
 {
     move |input| {
         let (input, _) = opt(char('+')).parse(input)?;
         let (input, n) = f.parse(input)?;
-        Ok((input, LispVal::Number(n)))
+        Ok((input, LispVal::Float(n)))
     }
 }
 
 fn negative_float<F>(mut f: F) -> impl FnMut(&str) -> IResult<&str, LispVal>
 where
-    F: Fn(&str) -> IResult<&str, i64>,
+    F: Fn(&str) -> IResult<&str, f64>,
 {
     move |input| {
         let (input, _) = char('-').parse(input)?;
         let (input, n) = f.parse(input)?;
-        Ok((input, LispVal::Number(-n)))
+        Ok((input, LispVal::Float(-n)))
     }
-}
-
-fn float_helper<F>(input: &str, f: F) -> IResult<&str, LispVal>
-where
-    F: Fn(&str) -> IResult<&str, i64> + Clone,
-{
-    alt((negative_integer(f.clone()), positive_integer(f))).parse(input)
 }
 
 fn float(input: &str) -> IResult<&str, LispVal> {

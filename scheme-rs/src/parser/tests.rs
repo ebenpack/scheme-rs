@@ -100,42 +100,42 @@ fn parse_block_comment() {
 #[test]
 fn parse_number() {
     // Decimal
-    assert_eq!(number.parse("1"), Ok(("", LispVal::Number(1))));
-    assert_eq!(number.parse("1729"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("+1729"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("-1729"), Ok(("", LispVal::Number(-1729))));
-    assert_eq!(number.parse("#d1729"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("#d+1729"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("#d-1729"), Ok(("", LispVal::Number(-1729))));
+    assert_eq!(number.parse("1"), Ok(("", LispVal::Integer(1))));
+    assert_eq!(number.parse("1729"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("+1729"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("-1729"), Ok(("", LispVal::Integer(-1729))));
+    assert_eq!(number.parse("#d1729"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("#d+1729"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("#d-1729"), Ok(("", LispVal::Integer(-1729))));
     // Binary
     assert_eq!(
         number.parse("#b11011000001"),
-        Ok(("", LispVal::Number(1729)))
+        Ok(("", LispVal::Integer(1729)))
     );
     assert_eq!(
         number.parse("#b+11011000001"),
-        Ok(("", LispVal::Number(1729)))
+        Ok(("", LispVal::Integer(1729)))
     );
     assert_eq!(
         number.parse("#b-11011000001"),
-        Ok(("", LispVal::Number(-1729)))
+        Ok(("", LispVal::Integer(-1729)))
     );
     // Octal
-    assert_eq!(number.parse("#o3301"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("#o+3301"), Ok(("", LispVal::Number(1729))));
-    assert_eq!(number.parse("#o-3301"), Ok(("", LispVal::Number(-1729))));
+    assert_eq!(number.parse("#o3301"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("#o+3301"), Ok(("", LispVal::Integer(1729))));
+    assert_eq!(number.parse("#o-3301"), Ok(("", LispVal::Integer(-1729))));
     // Hex
     assert_eq!(
         number.parse("#xDEADBEEF"),
-        Ok(("", LispVal::Number(3735928559)))
+        Ok(("", LispVal::Integer(3735928559)))
     );
     assert_eq!(
         number.parse("#x+DEADBEEF"),
-        Ok(("", LispVal::Number(3735928559)))
+        Ok(("", LispVal::Integer(3735928559)))
     );
     assert_eq!(
         number.parse("#x-DEADBEEF"),
-        Ok(("", LispVal::Number(-3735928559)))
+        Ok(("", LispVal::Integer(-3735928559)))
     );
 }
 
@@ -168,7 +168,11 @@ fn parse_raw_list() {
         raw_list("1 2 3"),
         Ok((
             "",
-            vec![LispVal::Number(1), LispVal::Number(2), LispVal::Number(3)]
+            vec![
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3)
+            ]
         ))
     );
     assert_eq!(raw_list(""), Ok(("", vec![])));
@@ -181,9 +185,9 @@ fn parse_vector() {
         Ok((
             "",
             LispVal::Vector(Rc::new(vec![
-                LispVal::Number(1),
-                LispVal::Number(2),
-                LispVal::Number(3)
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3)
             ]))
         ))
     );
@@ -192,13 +196,13 @@ fn parse_vector() {
         Ok((
             "",
             LispVal::Vector(Rc::new(vec![
-                LispVal::Number(1),
-                LispVal::Number(2),
-                LispVal::Number(3),
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
                 LispVal::Vector(Rc::new(vec![
-                    LispVal::Number(4),
-                    LispVal::Number(5),
-                    LispVal::Number(6)
+                    LispVal::Integer(4),
+                    LispVal::Integer(5),
+                    LispVal::Integer(6)
                 ]))
             ]))
         ))
@@ -212,9 +216,9 @@ fn parse_lists() {
         Ok((
             "",
             LispVal::List(Rc::new(vec![
-                LispVal::Number(1),
-                LispVal::Number(2),
-                LispVal::Number(3)
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3)
             ]))
         ))
     );
@@ -223,13 +227,13 @@ fn parse_lists() {
         Ok((
             "",
             LispVal::List(Rc::new(vec![
-                LispVal::Number(1),
-                LispVal::Number(2),
-                LispVal::Number(3),
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
                 LispVal::List(Rc::new(vec![
-                    LispVal::Number(4),
-                    LispVal::Number(5),
-                    LispVal::Number(6)
+                    LispVal::Integer(4),
+                    LispVal::Integer(5),
+                    LispVal::Integer(6)
                 ]))
             ]))
         ))
@@ -239,8 +243,8 @@ fn parse_lists() {
         Ok((
             "",
             LispVal::DottedList(
-                Rc::new(vec![LispVal::Number(1)]),
-                Rc::new(LispVal::Number(2))
+                Rc::new(vec![LispVal::Integer(1)]),
+                Rc::new(LispVal::Integer(2))
             )
         ))
     );
@@ -250,11 +254,11 @@ fn parse_lists() {
             "",
             LispVal::DottedList(
                 Rc::new(vec![
-                    LispVal::Number(1),
-                    LispVal::Number(2),
-                    LispVal::Number(3)
+                    LispVal::Integer(1),
+                    LispVal::Integer(2),
+                    LispVal::Integer(3)
                 ]),
-                Rc::new(LispVal::Number(2))
+                Rc::new(LispVal::Integer(2))
             )
         ))
     );
@@ -263,9 +267,9 @@ fn parse_lists() {
         Ok((
             "",
             LispVal::List(Rc::new(vec![
-                LispVal::Number(2),
-                LispVal::Number(1),
-                LispVal::Number(3),
+                LispVal::Integer(2),
+                LispVal::Integer(1),
+                LispVal::Integer(3),
             ]))
         ))
     );
@@ -274,10 +278,10 @@ fn parse_lists() {
         Ok((
             "",
             LispVal::List(Rc::new(vec![
-                LispVal::Number(2),
-                LispVal::Number(1),
-                LispVal::Number(3),
-                LispVal::Number(4),
+                LispVal::Integer(2),
+                LispVal::Integer(1),
+                LispVal::Integer(3),
+                LispVal::Integer(4),
             ]))
         ))
     );
@@ -299,9 +303,9 @@ fn parse_quoted() {
             LispVal::List(Rc::new(vec![
                 LispVal::Atom("quote".to_string()),
                 LispVal::List(Rc::new(vec![
-                    LispVal::Number(1),
-                    LispVal::Number(2),
-                    LispVal::Number(3),
+                    LispVal::Integer(1),
+                    LispVal::Integer(2),
+                    LispVal::Integer(3),
                 ]))
             ]))
         ))
@@ -317,9 +321,9 @@ fn parse_unquoted() {
             LispVal::List(Rc::new(vec![
                 LispVal::Atom("unquote".to_string()),
                 LispVal::List(Rc::new(vec![
-                    LispVal::Number(1),
-                    LispVal::Number(2),
-                    LispVal::Number(3),
+                    LispVal::Integer(1),
+                    LispVal::Integer(2),
+                    LispVal::Integer(3),
                 ]))
             ]))
         ))
@@ -334,9 +338,9 @@ fn parse_quasi_quote() {
             LispVal::List(Rc::new(vec![
                 LispVal::Atom("quasiquote".to_string()),
                 LispVal::List(Rc::new(vec![
-                    LispVal::Number(1),
-                    LispVal::Number(2),
-                    LispVal::Number(3),
+                    LispVal::Integer(1),
+                    LispVal::Integer(2),
+                    LispVal::Integer(3),
                 ]))
             ]))
         ))
@@ -351,9 +355,9 @@ fn parse_unquote_splicing() {
             LispVal::List(Rc::new(vec![
                 LispVal::Atom("unquote-splicing".to_string()),
                 LispVal::List(Rc::new(vec![
-                    LispVal::Number(1),
-                    LispVal::Number(2),
-                    LispVal::Number(3),
+                    LispVal::Integer(1),
+                    LispVal::Integer(2),
+                    LispVal::Integer(3),
                 ]))
             ]))
         ))

@@ -158,10 +158,10 @@ mod tests {
     fn test_get_head() {
         assert_eq!(
             get_heads(&vec![
-                LispVal::List(Rc::new(vec![LispVal::Number(1), LispVal::Number(2)])),
-                LispVal::List(Rc::new(vec![LispVal::Number(3), LispVal::Number(4)]))
+                LispVal::List(Rc::new(vec![LispVal::Integer(1), LispVal::Integer(2)])),
+                LispVal::List(Rc::new(vec![LispVal::Integer(3), LispVal::Integer(4)]))
             ]),
-            Ok(vec![LispVal::Number(1), LispVal::Number(3)])
+            Ok(vec![LispVal::Integer(1), LispVal::Integer(3)])
         );
     }
     #[test]
@@ -171,23 +171,23 @@ mod tests {
             get_tails(&vec![
                 LispVal::List(Rc::new(vec![
                     LispVal::Atom("a".to_string()),
-                    LispVal::Number(5)
+                    LispVal::Integer(5)
                 ])),
                 LispVal::List(Rc::new(vec![
                     LispVal::Atom("b".to_string()),
                     LispVal::List(Rc::new(vec![
                         LispVal::Atom("+".to_string()),
                         LispVal::Atom("a".to_string()),
-                        LispVal::Number(10)
+                        LispVal::Integer(10)
                     ]))
                 ]))
             ]),
             Ok(vec![
-                LispVal::Number(5),
+                LispVal::Integer(5),
                 LispVal::List(Rc::new(vec![
                     LispVal::Atom("+".to_string()),
                     LispVal::Atom("a".to_string()),
-                    LispVal::Number(10)
+                    LispVal::Integer(10)
                 ]))
             ])
         )
@@ -218,7 +218,10 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
         v @ LispVal::Void => Ok(v.clone()),
         v @ LispVal::String(_) => Ok(v.clone()),
         v @ LispVal::Char(_) => Ok(v.clone()),
-        v @ LispVal::Number(_) => Ok(v.clone()),
+        v @ LispVal::Integer(_) => Ok(v.clone()),
+        v @ LispVal::Float(_) => Ok(v.clone()),
+        v @ LispVal::Rational(_) => Ok(v.clone()),
+        v @ LispVal::Complex(_) => Ok(v.clone()),
         v @ LispVal::Vector(_) => Ok(v.clone()),
         v @ LispVal::Bool(_) => Ok(v.clone()),
         // eval _ val@(Integer _) = return val
@@ -399,7 +402,7 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
 
                 let n = eval(env, n)?;
                 let n = match n {
-                    LispVal::Number(n) => {
+                    LispVal::Integer(n) => {
                         usize::try_from(n).map_err(|_| {
                             LispError::GenericError(format!("vector-set!: index is out of range\nindex: {}\nvalid range: [0, {}]\nvector: {}", n, s.len(), var))
                         })?

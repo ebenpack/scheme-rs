@@ -15,7 +15,7 @@ fn list_displays() {
         format!(
             "{}",
             LispVal::List(Rc::new(vec![
-                LispVal::Number(1729),
+                LispVal::Integer(1729),
                 LispVal::String("str".to_string()),
                 LispVal::Nil,
                 LispVal::Bool(true),
@@ -42,7 +42,7 @@ fn list_displays() {
 
 #[test]
 fn number_displays() {
-    assert_eq!(format!("{}", LispVal::Number(1729)), "1729");
+    assert_eq!(format!("{}", LispVal::Integer(1729)), "1729");
 }
 
 #[test]

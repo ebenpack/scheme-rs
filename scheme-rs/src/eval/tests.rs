@@ -34,8 +34,8 @@ fn eval_char() {
 fn eval_number() {
     let env = Env::new();
     assert_eq!(
-        eval(&env, &LispVal::Number(1729)),
-        Ok(LispVal::Number(1729))
+        eval(&env, &LispVal::Integer(1729)),
+        Ok(LispVal::Integer(1729))
     )
 }
 
@@ -53,12 +53,12 @@ fn eval_vector() {
         eval(
             &env,
             &LispVal::Vector(Rc::new(vec![
-                LispVal::Number(1729),
+                LispVal::Integer(1729),
                 LispVal::String("foo".to_string())
             ]))
         ),
         Ok(LispVal::Vector(Rc::new(vec![
-            LispVal::Number(1729),
+            LispVal::Integer(1729),
             LispVal::String("foo".to_string())
         ])))
     )
@@ -69,19 +69,19 @@ fn eval_cond() {
     let env = Env::new();
 
     let (_, exp) = expression("(cond [#t 1] [#f 2] (else 3))").unwrap();
-    assert_eq!(eval(&env, &exp), Ok(LispVal::Number(1)));
+    assert_eq!(eval(&env, &exp), Ok(LispVal::Integer(1)));
 
     let (_, exp) = expression("(cond [#f 1] [#t 2] (else 3))").unwrap();
-    assert_eq!(eval(&env, &exp), Ok(LispVal::Number(2)));
+    assert_eq!(eval(&env, &exp), Ok(LispVal::Integer(2)));
 
     let (_, exp) = expression("(cond [#f 1] [#f 2] (else 3))").unwrap();
-    assert_eq!(eval(&env, &exp), Ok(LispVal::Number(3)));
+    assert_eq!(eval(&env, &exp), Ok(LispVal::Integer(3)));
 
     let (_, exp) = expression("(cond (1) [#f 2] (else 3))").unwrap();
-    assert_eq!(eval(&env, &exp), Ok(LispVal::Number(1)));
+    assert_eq!(eval(&env, &exp), Ok(LispVal::Integer(1)));
 
     let (_, exp) = expression("(cond (else 1729))").unwrap();
-    assert_eq!(eval(&env, &exp), Ok(LispVal::Number(1729)));
+    assert_eq!(eval(&env, &exp), Ok(LispVal::Integer(1729)));
 
     // TODO: Fix implementation
     // let (_, exp) = expression("(cond [#t 1] [else 2] (else 3))").unwrap();
@@ -99,7 +99,7 @@ fn eval_define_var() {
     assert_eq!(env.lookup("foo"), None);
     let (_, exp) = expression("(define foo 1)").unwrap();
     eval(&env, &exp).unwrap();
-    assert_eq!(env.lookup("foo"), Some(LispVal::Number(1)));
+    assert_eq!(env.lookup("foo"), Some(LispVal::Integer(1)));
 
     let (_, exp) = expression("(define foo 1)").unwrap();
     assert_eq!(
@@ -116,7 +116,7 @@ fn eval_lambda() {
     let (_, exprs) = expression_list("(define (first a b) a) (first 1 2)").unwrap();
     assert_eq!(
         eval_expression_list(&env, exprs).unwrap().last().unwrap(),
-        &LispVal::Number(1)
+        &LispVal::Integer(1)
     );
 
     let env = Env::new();
@@ -126,6 +126,6 @@ fn eval_lambda() {
     .unwrap();
     assert_eq!(
         eval_expression_list(&env, exprs).unwrap().last().unwrap(),
-        &LispVal::Number(2)
+        &LispVal::Integer(2)
     );
 }

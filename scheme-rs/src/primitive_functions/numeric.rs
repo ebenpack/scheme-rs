@@ -13,29 +13,29 @@ fn num_add(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     let mut result = 0;
     for val in args {
-        if let LispVal::Number(n) = val {
+        if let LispVal::Integer(n) = val {
             result += n;
         } else {
             // TODO: Typeerror?
             return Err(LispError::GenericError("Unexpected error in +".to_string()));
         }
     }
-    Ok(LispVal::Number(result))
+    Ok(LispVal::Integer(result))
 }
 
 fn num_sub(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in &args[1..] {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 result -= n;
             } else {
                 // TODO: Typeerror?
                 return Err(LispError::GenericError("Unexpected error in +".to_string()));
             }
         }
-        Ok(LispVal::Number(result))
+        Ok(LispVal::Integer(result))
     } else {
         Err(LispError::GenericError("Unexpected error in +".to_string()))
     }
@@ -45,29 +45,29 @@ fn num_mul(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     let mut result = 1;
     for val in args {
-        if let LispVal::Number(n) = val {
+        if let LispVal::Integer(n) = val {
             result *= n;
         } else {
             // TODO: Typeerror?
             return Err(LispError::GenericError("Unexpected error in +".to_string()));
         }
     }
-    Ok(LispVal::Number(result))
+    Ok(LispVal::Integer(result))
 }
 
 fn num_div(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in args.iter().skip(1) {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 result /= n;
             } else {
                 // TODO: Typeerror?
                 return Err(LispError::GenericError("Unexpected error in +".to_string()));
             }
         }
-        Ok(LispVal::Number(result))
+        Ok(LispVal::Integer(result))
     } else {
         // TODO: Typeerror?
         Err(LispError::GenericError("Unexpected error in +".to_string()))
@@ -78,7 +78,7 @@ fn num_eq(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     let mut result = None;
     for val in args {
-        if let LispVal::Number(n) = val {
+        if let LispVal::Integer(n) = val {
             match result {
                 None => result = Some(n),
                 Some(m) => {
@@ -106,9 +106,9 @@ fn num_neq(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn num_gt(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in args.iter().skip(1) {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 if result < *n {
                     return Ok(LispVal::Bool(false));
                 }
@@ -128,9 +128,9 @@ fn num_gt(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn num_lt(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in args.iter().skip(1) {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 if result < *n {
                     return Ok(LispVal::Bool(false));
                 }
@@ -150,9 +150,9 @@ fn num_lt(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn num_gte(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in args.iter().skip(1) {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 if !result >= *n {
                     return Ok(LispVal::Bool(false));
                 }
@@ -172,9 +172,9 @@ fn num_gte(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn num_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Number(mut result) = args[0] {
+    if let LispVal::Integer(mut result) = args[0] {
         for val in args.iter().skip(1) {
-            if let LispVal::Number(n) = val {
+            if let LispVal::Integer(n) = val {
                 if !result <= *n {
                     return Ok(LispVal::Bool(false));
                 }
@@ -195,7 +195,7 @@ fn num_mod(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
-        [LispVal::Number(n), LispVal::Number(m)] => Ok(LispVal::Number(n % m)),
+        [LispVal::Integer(n), LispVal::Integer(m)] => Ok(LispVal::Integer(n % m)),
         _ =>
         // TODO: Typeerror?
         {
@@ -210,8 +210,8 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::MinMax(1, 2))?;
     match &args[..] {
-        [LispVal::Number(n)] => Ok(LispVal::String(format!("{}", n))),
-        [LispVal::Number(n), LispVal::Number(base)] => {
+        [LispVal::Integer(n)] => Ok(LispVal::String(format!("{}", n))),
+        [LispVal::Integer(n), LispVal::Integer(base)] => {
             match base {
                 2 | 8 | 10 | 16 => {
                     let base = u8::try_from(*base).map_err(|_| LispError::GenericError("Unexpected error in number->string".to_string()))?;
@@ -238,7 +238,7 @@ fn is_number(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
-        [LispVal::Number(_)] => Ok(LispVal::Bool(true)),
+        [LispVal::Integer(_)] => Ok(LispVal::Bool(true)),
         _ => Ok(LispVal::Bool(false)),
     }
 }
