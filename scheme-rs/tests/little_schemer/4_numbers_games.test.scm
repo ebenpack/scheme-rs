@@ -2,6 +2,8 @@
 
 (test (atom? 1729) #t)
 (test (number? -3) #t)
+;; (test (number? 3.14159) #t)
+(test (+ 46 12) 58)
 
 (define (occur* a l)
   (cond
