@@ -22,7 +22,7 @@ cargo-build:
 
 .PHONY: web
 web:
-	npx --yes -c 'wasm-pack build --release'
+	wasm-pack build --release
 	yarn --cwd www install --frozen-lockfile 
 	yarn --cwd www build
 
