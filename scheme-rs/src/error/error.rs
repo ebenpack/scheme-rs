@@ -7,7 +7,7 @@ use nom::error::ParseError;
 
 use crate::lisp_val::LispVal;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Arity {
     Min(u16),
     MinMax(u16, u16),

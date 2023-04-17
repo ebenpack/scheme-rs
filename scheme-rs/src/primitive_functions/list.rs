@@ -55,7 +55,7 @@ fn cdr(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match &args[..] {
         [LispVal::DottedList(xs, val)] => match &xs[..] {
-            [_] => return Ok((&**val).clone()),
+            [_] => return Ok((**val).clone()),
             [_, xs @ ..] => return Ok(LispVal::DottedList(Rc::new(xs.to_vec()), val.clone())),
             _ => (),
         },
@@ -77,12 +77,12 @@ fn cons(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
         [a, LispVal::List(b)] => {
-            let mut new_list = (&**b).clone().to_vec();
+            let mut new_list = (**b).clone().to_vec();
             new_list.insert(0, a.clone());
             Ok(LispVal::List(Rc::new(new_list)))
         }
         [a, LispVal::DottedList(b, c)] => {
-            let mut new_list = (&**b).clone().to_vec();
+            let mut new_list = (**b).clone().to_vec();
             new_list.insert(0, a.clone());
             Ok(LispVal::DottedList(Rc::new(new_list), c.clone()))
         }
@@ -235,7 +235,7 @@ fn replicate_m(count: u8, xs: Vec<char>) -> Vec<Vec<char>> {
     repeated.iter().rfold(vec![vec![]], |tails, heads| {
         heads
             .iter()
-            .map(|head| {
+            .flat_map(|head| {
                 tails
                     .iter()
                     .map(|tail| {
@@ -245,7 +245,6 @@ fn replicate_m(count: u8, xs: Vec<char>) -> Vec<Vec<char>> {
                     })
                     .collect::<Vec<_>>()
             })
-            .flatten()
             .collect::<Vec<Vec<char>>>()
     })
 }

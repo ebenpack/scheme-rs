@@ -115,7 +115,7 @@ fn get_heads(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
         [] => Ok(vec![]),
         [LispVal::List(xs), ys @ ..] => match &xs[..] {
             [x, ..] => {
-                let mut result = get_heads(&ys.to_vec())?;
+                let mut result = get_heads(ys)?;
                 result.insert(0, x.clone());
                 Ok(result)
             }
@@ -134,7 +134,7 @@ fn get_tails(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
         [] => Ok(vec![]),
         [LispVal::List(xs), ys @ ..] => match &xs[..] {
             [_, xs @ ..] => {
-                let mut result = get_tails(&ys.to_vec())?;
+                let mut result = get_tails(ys)?;
                 let mut new_list = xs.to_vec();
                 new_list.append(&mut result);
                 Ok(new_list)

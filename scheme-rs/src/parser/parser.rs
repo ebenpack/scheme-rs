@@ -7,7 +7,7 @@ use crate::lisp_val::LispVal;
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag},
-    character::complete::{char, digit1, multispace0, multispace1, newline, none_of, one_of},
+    character::complete::{char, multispace0, multispace1, newline, none_of, one_of},
     combinator::fail,
     error::ParseError,
     multi::{many0, many1, separated_list0},

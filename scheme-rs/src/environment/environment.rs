@@ -10,9 +10,11 @@ pub struct Environment {
     parent: Option<Env>,
 }
 
+pub type Signal = Box<dyn FnMut(&mut Vec<LispVal>)>;
+
 #[wasm_bindgen]
 pub struct Port {
-    _signal: Box<dyn FnMut(&mut Vec<LispVal>)>,
+    _signal: Signal,
     data: Vec<LispVal>,
 }
 
@@ -32,7 +34,7 @@ impl Port {
 pub struct Ports(Rc<HashMap<String, Rc<RefCell<Port>>>>);
 
 impl Ports {
-    pub fn new(default_signal: Box<dyn FnMut(&mut Vec<LispVal>)>) -> Self {
+    pub fn new(default_signal: Signal) -> Self {
         Ports(Rc::new(HashMap::from([(
             "default".to_string(),
             Rc::new(RefCell::new(Port {

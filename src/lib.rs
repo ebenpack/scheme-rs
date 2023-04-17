@@ -1,5 +1,6 @@
 mod utils;
 
+use scheme_rs::environment::Signal;
 use scheme_rs::lisp_val::LispVal;
 use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
@@ -19,7 +20,7 @@ extern "C" {
     fn setTimeout(f: &js_sys::Function, time: i32);
 }
 
-fn wrap_signal(signal: js_sys::Function) -> Box<dyn FnMut(&mut Vec<LispVal>)> {
+fn wrap_signal(signal: js_sys::Function) -> Signal {
     Box::new(move |vals| {
         // TODO! HACK! This works around a refcell borrow issue :S
         // E.g. The port is borrowed in order to write to it, the port is

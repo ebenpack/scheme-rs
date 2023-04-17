@@ -9,7 +9,7 @@ use crate::error::LispResult;
 
 // TODO: Constructor funcs for IFunc & EnvCtx?
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PrimitiveFunc {
     pub name: String,
     pub func: fn(Vec<LispVal>) -> LispResult<LispVal>,
@@ -151,7 +151,7 @@ impl fmt::Display for LispVal {
                     }
                 }
             };
-            format!("#\\{}", s.to_string())
+            format!("#\\{}", s)
         }
         write!(f, "{}", format_helper(self))
     }

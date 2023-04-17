@@ -1,6 +1,6 @@
 extern crate nom;
 
-use crate::{error, lisp_val::LispVal};
+use crate::{lisp_val::LispVal};
 
 use nom::{
     branch::alt,
@@ -8,7 +8,7 @@ use nom::{
     combinator::{fail, opt},
     multi::many1,
     sequence::tuple,
-    Err, IResult, Parser,
+    IResult, Parser,
 };
 
 /*--------------

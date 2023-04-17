@@ -1,3 +1,4 @@
+use environment::Signal;
 use error::LispResult;
 
 use crate::{
@@ -20,7 +21,7 @@ pub struct Thingus {
 }
 
 impl Thingus {
-    pub fn new(signal: Box<dyn FnMut(&mut Vec<LispVal>)>) -> Self {
+    pub fn new(signal: Signal) -> Self {
         let primitive_bindings = primitive_functions();
         let ports = Ports::new(signal);
         let env = Env::with_bindings(primitive_bindings, ports.clone());

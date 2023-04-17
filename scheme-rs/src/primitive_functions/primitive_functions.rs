@@ -27,7 +27,7 @@ fn eq(args: Vec<LispVal>) -> LispResult<LispVal> {
         [LispVal::Char(arg1), LispVal::Char(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
         [LispVal::Atom(arg1), LispVal::Atom(arg2)] => Ok(LispVal::Bool(arg1 == arg2)),
         [LispVal::DottedList(xs, x), LispVal::DottedList(ys, y)] => {
-            if let LispVal::Bool(false) = eq(vec![(&**x).clone(), (&**y).clone()])? {
+            if let LispVal::Bool(false) = eq(vec![(**x).clone(), (**y).clone()])? {
                 return Ok(LispVal::Bool(false));
             }
             if xs.len() != ys.len() {
