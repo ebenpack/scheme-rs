@@ -3,7 +3,7 @@ use std::rc::Rc;
 use super::parser::*;
 use crate::lisp_val::*;
 use nom::{Err, Parser};
-use num::complex::Complex64;
+use num::{complex::Complex64, Rational64};
 
 #[test]
 fn parse_atom() {
@@ -526,7 +526,74 @@ fn parse_complex_number() {
 
 #[test]
 fn parse_rational_number() {
-    todo!()
+    // Decimal
+    assert_eq!(
+        number.parse("1/1"),
+        Ok(("", LispVal::Rational(Rational64::new(1, 1))))
+    );
+    assert_eq!(
+        number.parse("1729/3"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 3))))
+    );
+    assert_eq!(
+        number.parse("+1729/3"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 3))))
+    );
+    assert_eq!(
+        number.parse("-1729/3"),
+        Ok(("", LispVal::Rational(Rational64::new(-1729, 3))))
+    );
+    // Binary
+    assert_eq!(
+        number.parse("#b11011000001/1"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 1))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001/11"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 3))))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001/11"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 3))))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001/11"),
+        Ok(("", LispVal::Rational(Rational64::new(-1729, 3))))
+    );
+    // Octal
+    assert_eq!(
+        number.parse("#o3301/1"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 1))))
+    );
+    assert_eq!(
+        number.parse("#o3301/3"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 3))))
+    );
+    assert_eq!(
+        number.parse("#o+3301/11"),
+        Ok(("", LispVal::Rational(Rational64::new(1729, 9))))
+    );
+    assert_eq!(
+        number.parse("#o-3301/11"),
+        Ok(("", LispVal::Rational(Rational64::new(-1729, 9))))
+    );
+    // Hex
+    assert_eq!(
+        number.parse("#xDEADBEEF/1"),
+        Ok(("", LispVal::Rational(Rational64::new(3735928559, 1))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF/CAFE"),
+        Ok(("", LispVal::Rational(Rational64::new(3735928559, 51966))))
+    );
+    assert_eq!(
+        number.parse("#x+DEADBEEF/CAFE"),
+        Ok(("", LispVal::Rational(Rational64::new(3735928559, 51966))))
+    );
+    assert_eq!(
+        number.parse("#x-DEADBEEF/CAFE"),
+        Ok(("", LispVal::Rational(Rational64::new(-3735928559, 51966))))
+    );
 }
 
 #[test]

@@ -5,14 +5,14 @@ use crate::lisp_val::LispVal;
 use nom::{
     branch::alt,
     character::complete::{
-        char, digit0, digit1, hex_digit0, hex_digit1, oct_digit0, oct_digit1, one_of,
+        char, digit0, digit1, hex_digit0, hex_digit1, none_of, oct_digit0, oct_digit1, one_of,
     },
     combinator::{fail, opt, peek},
     multi::{many0, many1},
     sequence::{preceded, separated_pair, tuple},
     IResult, Parser,
 };
-use num::complex::Complex64;
+use num::{complex::Complex64, Rational64};
 
 /*--------------
 -- Integer
@@ -223,17 +223,21 @@ fn float(input: &str) -> IResult<&str, LispVal> {
 --------------*/
 
 fn complex(input: &str) -> IResult<&str, LispVal> {
+    // Store the base for later if it's there, but don't consume it
+    // b/c float/integer will need it
     let (input, base) = peek(opt(preceded(char('#'), one_of("bdox")))).parse(input)?;
     let (input, m) = alt((float, integer)).parse(input)?;
 
+    // Just enforce that there is a +/-, because they're optional for
+    // the various float/integer parsers
     let (input, _) = peek(alt((char('-'), char('+')))).parse(input)?;
     let (input, n) = match base {
         Some('b') => alt((float_binary, integer_binary)).parse(input),
         Some('d') => alt((float_decimal, integer_decimal)).parse(input),
         Some('o') => alt((float_octal, integer_octal)).parse(input),
         Some('x') => alt((float_hex, integer_hex)).parse(input),
-        Some(_) => fail(input),
         None => alt((float_decimal, integer_decimal)).parse(input),
+        Some(_) => unreachable!(),
     }?;
     let (input, _) = char('i').parse(input)?;
 
@@ -258,16 +262,32 @@ fn complex(input: &str) -> IResult<&str, LispVal> {
 -- Rational
 --------------*/
 
-pub fn number(input: &str) -> IResult<&str, LispVal> {
-    alt((complex, float, integer)).parse(input)
-    // alt((complex, rational, float, integer)).parse(input)
+fn rational(input: &str) -> IResult<&str, LispVal> {
+    // Store the base for later if it's there, but don't consume it
+    // b/c float/integer will need it
+    let (input, base) = peek(opt(preceded(char('#'), one_of("bdox")))).parse(input)?;
+    let (input, m) = integer.parse(input)?;
+
+    let (input, _) = char('/').parse(input)?;
+    let (input, _) = peek(none_of("+-")).parse(input)?;
+
+    let (input, n) = match base {
+        Some('b') => integer_binary.parse(input),
+        Some('d') => integer_decimal.parse(input),
+        Some('o') => integer_octal.parse(input),
+        Some('x') => integer_hex.parse(input),
+        None => integer_decimal.parse(input),
+        Some(_) => unreachable!(),
+    }?;
+
+    match (m, n) {
+        (LispVal::Integer(m), LispVal::Integer(n)) => {
+            Ok((input, LispVal::Rational(Rational64::new(m, n))))
+        }
+        _ => unreachable!(),
+    }
 }
 
-// parseIntegerBase :: Char -> Parser LispVal
-// parseIntegerBase base =
-//   case base of
-//     'd' -> parseIntegerDecimal
-//     'o' -> parseIntegerOctal
-//     'x' -> parseIntegerHex
-//     'b' -> parseIntegerBinary
-//     _ -> failure "Bad integer format"
+pub fn number(input: &str) -> IResult<&str, LispVal> {
+    alt((complex, rational, float, integer)).parse(input)
+}
