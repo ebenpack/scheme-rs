@@ -235,12 +235,14 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
 }
 
 fn is_number(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
     check_arity(&args, Arity::MinMax(1, 1))?;
-    match &args[..] {
-        [LispVal::Integer(_)] => Ok(LispVal::Bool(true)),
-        _ => Ok(LispVal::Bool(false)),
-    }
+    Ok(LispVal::Bool(matches!(
+        args.first(),
+        Some(LispVal::Integer(_))
+            | Some(LispVal::Float(_))
+            | Some(LispVal::Rational(_))
+            | Some(LispVal::Complex(_))
+    )))
 }
 
 pub fn numeric_primitives() -> Bindings {

@@ -9,7 +9,6 @@ use nom::{
     },
     combinator::{fail, opt},
     multi::{many0, many1},
-    number::complete::double,
     sequence::{preceded, separated_pair, tuple},
     IResult, Parser,
 };
