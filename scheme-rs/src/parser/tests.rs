@@ -3,6 +3,7 @@ use std::rc::Rc;
 use super::parser::*;
 use crate::lisp_val::*;
 use nom::{Err, Parser};
+use num::complex::Complex64;
 
 #[test]
 fn parse_atom() {
@@ -268,6 +269,264 @@ fn parse_float_number() {
         number.parse("#x-DEADBEEF.CAFEBABE"),
         Ok(("", LispVal::Float(-3735928559.792949)))
     );
+}
+
+#[test]
+fn parse_complex_number() {
+    // Decimal
+    assert_eq!(
+        number.parse("1+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("+1+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1.0+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1.0+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1.+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("+1.0+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("+1.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("+1.0+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("+1.+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("-1+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("-1.0+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("-1.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("-1+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("-1+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("1-0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("0-1.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(0.0, -1.0))))
+    );
+    assert_eq!(
+        number.parse("0-1.i"),
+        Ok(("", LispVal::Complex(Complex64::new(0.0, -1.0))))
+    );
+    assert_eq!(
+        number.parse("-1-1i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1.0, -1.0))))
+    );
+    // Binary
+    assert_eq!(
+        number.parse("#b11011000001+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001+11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001.+11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001+11011000001.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001+11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001+11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1729.0, 1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b11011000001-11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, -1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001-11011000001i"),
+        Ok(("", LispVal::Complex(Complex64::new(-1729.0, -1729.0))))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001.10000011011-11011000001.10000011011i"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(-1729.51318359375, -1729.51318359375))
+        ))
+    );
+    assert_eq!(
+        number.parse("#b11011000001.10000011011-11011000001.10000011011i"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(1729.51318359375, -1729.51318359375))
+        ))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001.10000011011-11011000001.10000011011i"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(1729.51318359375, -1729.51318359375))
+        ))
+    );
+    // Octal
+    assert_eq!(
+        number.parse("#o3301+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301.0+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301.732+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.92578125, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301.7320+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.92578125, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#o3301+0.732i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.92578125))))
+    );
+    assert_eq!(
+        number.parse("#o3301.+0.732i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.92578125))))
+    );
+    assert_eq!(
+        number.parse("#o3301.0+0.732i"),
+        Ok(("", LispVal::Complex(Complex64::new(1729.0, 0.92578125))))
+    );
+    // Hex
+    assert_eq!(
+        number.parse("#xDEADBEEF+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.0+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF+0.0i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.CAFE+0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.792938, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.CAFE+0i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.792938, 0.0))))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF+0.CAFEi"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(3735928559.0, 0.792938232421875))
+        ))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.+0.CAFEi"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(3735928559.0, 0.792938232421875))
+        ))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.0-0.CAFEi"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(3735928559.0, -0.792938232421875))
+        ))
+    );
+    assert_eq!(
+        number.parse("#x-DEADBEEF.0-0.CAFEi"),
+        Ok((
+            "",
+            LispVal::Complex(Complex64::new(-3735928559.0, -0.792938232421875))
+        ))
+    );
+    assert_eq!(
+        number.parse("#x+DEADBEEF.0-0.i"),
+        Ok(("", LispVal::Complex(Complex64::new(3735928559.0, 0.0))))
+    );
+}
+
+#[test]
+fn parse_rational_number() {
+    todo!()
 }
 
 #[test]

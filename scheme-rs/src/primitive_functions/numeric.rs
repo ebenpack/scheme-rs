@@ -133,7 +133,9 @@ fn num_gt(args: Vec<LispVal>) -> LispResult<LispVal> {
             (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m > n)),
             (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m > n)),
             (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m > n)),
-            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("> not defined for complex numbers".to_string())),
+            (LispVal::Complex(_), LispVal::Complex(_)) => Err(LispError::GenericError(
+                "> not defined for complex numbers".to_string(),
+            )),
             _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
     } else {
@@ -148,7 +150,9 @@ fn num_lt(args: Vec<LispVal>) -> LispResult<LispVal> {
             (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m < n)),
             (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m < n)),
             (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m < n)),
-            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("< not defined for complex numbers".to_string())),
+            (LispVal::Complex(_), LispVal::Complex(_)) => Err(LispError::GenericError(
+                "< not defined for complex numbers".to_string(),
+            )),
             _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
     } else {
@@ -163,7 +167,9 @@ fn num_gte(args: Vec<LispVal>) -> LispResult<LispVal> {
             (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m >= n)),
             (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m >= n)),
             (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m >= n)),
-            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError(">= not defined for complex numbers".to_string())),
+            (LispVal::Complex(_), LispVal::Complex(_)) => Err(LispError::GenericError(
+                ">= not defined for complex numbers".to_string(),
+            )),
             _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
     } else {
@@ -178,7 +184,9 @@ fn num_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
             (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m <= n)),
             (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m <= n)),
             (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m <= n)),
-            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("<= not defined for complex numbers".to_string())),
+            (LispVal::Complex(_), LispVal::Complex(_)) => Err(LispError::GenericError(
+                "<= not defined for complex numbers".to_string(),
+            )),
             _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
     } else {

@@ -7,11 +7,12 @@ use nom::{
     character::complete::{
         char, digit0, digit1, hex_digit0, hex_digit1, oct_digit0, oct_digit1, one_of,
     },
-    combinator::{fail, opt},
+    combinator::{fail, opt, peek},
     multi::{many0, many1},
     sequence::{preceded, separated_pair, tuple},
     IResult, Parser,
 };
+use num::complex::Complex64;
 
 /*--------------
 -- Integer
@@ -221,12 +222,44 @@ fn float(input: &str) -> IResult<&str, LispVal> {
 -- Complex
 --------------*/
 
+fn complex(input: &str) -> IResult<&str, LispVal> {
+    let (input, base) = peek(opt(preceded(char('#'), one_of("bdox")))).parse(input)?;
+    let (input, m) = alt((float, integer)).parse(input)?;
+
+    let (input, _) = peek(alt((char('-'), char('+')))).parse(input)?;
+    let (input, n) = match base {
+        Some('b') => alt((float_binary, integer_binary)).parse(input),
+        Some('d') => alt((float_decimal, integer_decimal)).parse(input),
+        Some('o') => alt((float_octal, integer_octal)).parse(input),
+        Some('x') => alt((float_hex, integer_hex)).parse(input),
+        Some(_) => fail(input),
+        None => alt((float_decimal, integer_decimal)).parse(input),
+    }?;
+    let (input, _) = char('i').parse(input)?;
+
+    match (m, n) {
+        (LispVal::Float(m), LispVal::Float(n)) => {
+            Ok((input, LispVal::Complex(Complex64::new(m, n))))
+        }
+        (LispVal::Float(m), LispVal::Integer(n)) => {
+            Ok((input, LispVal::Complex(Complex64::new(m, n as f64))))
+        }
+        (LispVal::Integer(m), LispVal::Float(n)) => {
+            Ok((input, LispVal::Complex(Complex64::new(m as f64, n))))
+        }
+        (LispVal::Integer(m), LispVal::Integer(n)) => {
+            Ok((input, LispVal::Complex(Complex64::new(m as f64, n as f64))))
+        }
+        _ => unreachable!(),
+    }
+}
+
 /*--------------
 -- Rational
 --------------*/
 
 pub fn number(input: &str) -> IResult<&str, LispVal> {
-    alt((float, integer)).parse(input)
+    alt((complex, float, integer)).parse(input)
     // alt((complex, rational, float, integer)).parse(input)
 }
 
