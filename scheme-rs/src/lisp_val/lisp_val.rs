@@ -110,6 +110,7 @@ impl fmt::Display for LispVal {
         }
 
         fn format_helper(val: &LispVal) -> String {
+            // TODO: Better number formatting
             match val {
                 LispVal::Atom(s) => s.clone(),
                 LispVal::List(xs) => format!("({})", format_list(xs)),

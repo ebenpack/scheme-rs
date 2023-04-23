@@ -91,6 +91,8 @@ mod tests {
         assert_eq!(t.eval("#\\a"), "#\\a");
         assert_eq!(t.eval("1729"), "1729");
         assert_eq!(t.eval("#(1 2 3)"), "#(1 2 3)");
+        assert_eq!(t.eval("2.2"), "2.2");
+        assert_eq!(t.eval("(+ 1.1 2.3)"), "3.4");
     }
 
     #[test]

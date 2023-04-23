@@ -1,98 +1,121 @@
 use std::collections::HashMap;
 
+use num::rational::Ratio;
+use num::Zero;
 use radix_fmt::radix;
 
 use crate::environment::Bindings;
 use crate::error::{Arity, LispError, LispResult};
 use crate::lisp_val::LispVal;
+use crate::numbers::cast;
 use crate::primitive_functions::util::check_arity;
 use crate::primitive_functions::util::mk_prim_fn_binding;
 
-// TODO: macro?
 fn num_add(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    let mut result = 0;
-    for val in args {
-        if let LispVal::Integer(n) = val {
-            result += n;
+    args.iter().fold(Ok(LispVal::Integer(0)), |res, y| {
+        if let Ok(m) = res {
+            match cast(&m, y)? {
+                (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Integer(m + n)),
+                (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Float(m + n)),
+                (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Rational(m + n)),
+                (LispVal::Complex(m), LispVal::Complex(n)) => Ok(LispVal::Complex(m + n)),
+                _ => Err(LispError::GenericError("Unexpected error in +".to_string())),
+            }
         } else {
-            // TODO: Typeerror?
-            return Err(LispError::GenericError("Unexpected error in +".to_string()));
+            res
         }
-    }
-    Ok(LispVal::Integer(result))
+    })
 }
 
 fn num_sub(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in &args[1..] {
-            if let LispVal::Integer(n) = val {
-                result -= n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
+    let first = args.first().unwrap();
+    args.iter().skip(1).fold(Ok(first.clone()), |res, y| {
+        if let Ok(m) = res {
+            match cast(&m, y)? {
+                (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Integer(m - n)),
+                (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Float(m - n)),
+                (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Rational(m - n)),
+                (LispVal::Complex(m), LispVal::Complex(n)) => Ok(LispVal::Complex(m - n)),
+                _ => Err(LispError::GenericError("Unexpected error in -".to_string())),
             }
+        } else {
+            res
         }
-        Ok(LispVal::Integer(result))
-    } else {
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
-    }
+    })
 }
 
 fn num_mul(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    let mut result = 1;
-    for val in args {
-        if let LispVal::Integer(n) = val {
-            result *= n;
+    args.iter().fold(Ok(LispVal::Integer(1)), |res, y| {
+        if let Ok(m) = res {
+            match cast(&m, y)? {
+                (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Integer(m * n)),
+                (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Float(m * n)),
+                (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Rational(m * n)),
+                (LispVal::Complex(m), LispVal::Complex(n)) => Ok(LispVal::Complex(m * n)),
+                _ => Err(LispError::GenericError("Unexpected error in +".to_string())),
+            }
         } else {
-            // TODO: Typeerror?
-            return Err(LispError::GenericError("Unexpected error in +".to_string()));
+            res
         }
-    }
-    Ok(LispVal::Integer(result))
+    })
 }
 
 fn num_div(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
     check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in args.iter().skip(1) {
-            if let LispVal::Integer(n) = val {
-                result /= n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
+    let first = args.first().unwrap();
+    args.iter().skip(1).fold(Ok(first.clone()), |res, y| {
+        if let Ok(m) = res {
+            match cast(&m, y)? {
+                (LispVal::Integer(m), LispVal::Integer(n)) => {
+                    if n == 0 {
+                        Err(LispError::GenericError("Divide by zero".to_owned()))
+                    } else {
+                        Ok(LispVal::Rational(Ratio::new(m, n)))
+                    }
+                }
+                (LispVal::Float(m), LispVal::Float(n)) => {
+                    if n == 0.0 {
+                        Err(LispError::GenericError("Divide by zero".to_owned()))
+                    } else {
+                        Ok(LispVal::Float(m / n))
+                    }
+                }
+                (LispVal::Rational(m), LispVal::Rational(n)) => {
+                    if n.is_zero() {
+                        Err(LispError::GenericError("Divide by zero".to_owned()))
+                    } else {
+                        Ok(LispVal::Rational(m / n))
+                    }
+                }
+                (LispVal::Complex(m), LispVal::Complex(n)) => {
+                    if n.is_zero() {
+                        Err(LispError::GenericError("Divide by zero".to_owned()))
+                    } else {
+                        Ok(LispVal::Complex(m / n))
+                    }
+                }
+                _ => Err(LispError::GenericError("Unexpected error in -".to_string())),
             }
+        } else {
+            res
         }
-        Ok(LispVal::Integer(result))
-    } else {
-        // TODO: Typeerror?
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
-    }
+    })
 }
 
 fn num_eq(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    let mut result = None;
-    for val in args {
-        if let LispVal::Integer(n) = val {
-            match result {
-                None => result = Some(n),
-                Some(m) => {
-                    if m != n {
-                        return Ok(LispVal::Bool(false));
-                    }
-                }
-            }
-        } else {
-            // TODO: Typeerror?
-            return Err(LispError::GenericError("Unexpected error in +".to_string()));
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    if let [m, n] = &args[..] {
+        match cast(m, n)? {
+            (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m == n)),
+            (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m == n)),
+            (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m == n)),
+            (LispVal::Complex(m), LispVal::Complex(n)) => Ok(LispVal::Bool(m == n)),
+            _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
+    } else {
+        unreachable!()
     }
-    Ok(LispVal::Bool(true))
 }
 
 fn num_neq(args: Vec<LispVal>) -> LispResult<LispVal> {
@@ -104,90 +127,62 @@ fn num_neq(args: Vec<LispVal>) -> LispResult<LispVal> {
 }
 
 fn num_gt(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in args.iter().skip(1) {
-            if let LispVal::Integer(n) = val {
-                if result < *n {
-                    return Ok(LispVal::Bool(false));
-                }
-                result = *n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
-            }
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    if let [m, n] = &args[..] {
+        match cast(m, n)? {
+            (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m > n)),
+            (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m > n)),
+            (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m > n)),
+            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("> not defined for complex numbers".to_string())),
+            _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
-        Ok(LispVal::Bool(true))
     } else {
-        // TODO: Typeerror?
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
+        unreachable!()
     }
 }
 
 fn num_lt(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in args.iter().skip(1) {
-            if let LispVal::Integer(n) = val {
-                if result < *n {
-                    return Ok(LispVal::Bool(false));
-                }
-                result = *n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
-            }
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    if let [m, n] = &args[..] {
+        match cast(m, n)? {
+            (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m < n)),
+            (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m < n)),
+            (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m < n)),
+            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("< not defined for complex numbers".to_string())),
+            _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
-        Ok(LispVal::Bool(true))
     } else {
-        // TODO: Typeerror?
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
+        unreachable!()
     }
 }
 
 fn num_gte(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in args.iter().skip(1) {
-            if let LispVal::Integer(n) = val {
-                if !result >= *n {
-                    return Ok(LispVal::Bool(false));
-                }
-                result = *n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
-            }
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    if let [m, n] = &args[..] {
+        match cast(m, n)? {
+            (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m >= n)),
+            (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m >= n)),
+            (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m >= n)),
+            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError(">= not defined for complex numbers".to_string())),
+            _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
-        Ok(LispVal::Bool(true))
     } else {
-        // TODO: Typeerror?
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
+        unreachable!()
     }
 }
 
 fn num_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
-    check_arity(&args, Arity::Min(1))?;
-    if let LispVal::Integer(mut result) = args[0] {
-        for val in args.iter().skip(1) {
-            if let LispVal::Integer(n) = val {
-                if !result <= *n {
-                    return Ok(LispVal::Bool(false));
-                }
-                result = *n;
-            } else {
-                // TODO: Typeerror?
-                return Err(LispError::GenericError("Unexpected error in +".to_string()));
-            }
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    if let [m, n] = &args[..] {
+        match cast(m, n)? {
+            (LispVal::Integer(m), LispVal::Integer(n)) => Ok(LispVal::Bool(m <= n)),
+            (LispVal::Float(m), LispVal::Float(n)) => Ok(LispVal::Bool(m <= n)),
+            (LispVal::Rational(m), LispVal::Rational(n)) => Ok(LispVal::Bool(m <= n)),
+            (LispVal::Complex(_), LispVal::Complex(_)) =>  Err(LispError::GenericError("<= not defined for complex numbers".to_string())),
+            _ => Err(LispError::GenericError("Unexpected error in =".to_string())),
         }
-        Ok(LispVal::Bool(true))
     } else {
-        // TODO: Typeerror?
-        Err(LispError::GenericError("Unexpected error in +".to_string()))
+        unreachable!()
     }
 }
 
@@ -207,7 +202,6 @@ fn num_mod(args: Vec<LispVal>) -> LispResult<LispVal> {
 }
 
 fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
-    // TODO: Other number types
     check_arity(&args, Arity::MinMax(1, 2))?;
     match &args[..] {
         [LispVal::Integer(n)] => Ok(LispVal::String(format!("{}", n))),
@@ -224,6 +218,51 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
                 ))
             }
         }
+        [LispVal::Float(n)] => Ok(LispVal::String(format!("{}", n))),
+        [LispVal::Float(_), LispVal::Integer(_)] => {
+            Err(LispError::GenericError(
+                "number->string: inexact numbers can only be printed in base 10".to_string(),
+            ))
+        },
+        [LispVal::Rational(r)] => {
+            if *r.denom() == 0 {
+                Ok(LispVal::String(format!("{}", r.numer())))
+            } else {
+                Ok(LispVal::String(format!("{}/{}", r.numer(), r.denom())))
+            }
+        },
+        [LispVal::Rational(r), LispVal::Integer(base)] => {
+            match base {
+                2 | 8 | 10 | 16 => {
+                    let base = u8::try_from(*base).map_err(|_| LispError::GenericError("Unexpected error in number->string".to_string()))?;
+                    if *r.denom() == 0 {
+                        Ok(
+                            LispVal::String(format!("{}", radix(*r.numer(), base)))
+                        )
+                    } else {
+                        Ok(
+                            LispVal::String(format!("{}/{}", radix(*r.numer(), base), radix(*r.denom(), base)))
+                        )
+                    }
+                }
+                _ => Err(LispError::GenericError(
+                    format!("number->string: contract violation\nexpected: (or/c 2 8 10 16)\ngiven: {}\nargument position: 2nd", base),
+                ))
+            }
+        }
+        [LispVal::Complex(c)] => {
+            if c.im == 0.0 {
+                Ok(LispVal::String(format!("{}", c.re)))
+            } else {
+                Ok(LispVal::String(format!("{}+{}i", c.re, c.im)))
+            }
+        },
+        [LispVal::Complex(_), LispVal::Integer(_)] => {
+            // TODO: Technically we should be able to format exact complex #s
+            Err(LispError::GenericError(
+                "number->string: inexact numbers can only be printed in base 10".to_string(),
+            ))
+        },
         _ =>
         // TODO: Typeerror?
             {
