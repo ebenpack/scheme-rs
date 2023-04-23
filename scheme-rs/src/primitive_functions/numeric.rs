@@ -194,11 +194,51 @@ fn num_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
     }
 }
 
+fn num_to_int(n: &LispVal) -> LispResult<i64> {
+    match n {
+        a @ LispVal::Integer(n) => Ok(*n),
+        LispVal::Float(n) => {
+            if n.fract() == 0.0 {
+                Ok(*n as i64)
+            } else {
+                Err(LispError::GenericError(
+                    "Could not convert float to integer".to_string(),
+                ))
+            }
+        }
+        LispVal::Rational(n) => {
+            if *n.denom() == 1 {
+                Ok(*n.numer())
+            } else {
+                Err(LispError::GenericError(
+                    "Could not convert rational to integer".to_string(),
+                ))
+            }
+        }
+        LispVal::Complex(n) => {
+            if n.im == 0.0 && n.re.fract() == 0.0 {
+                Ok(n.re as i64)
+            } else {
+                Err(LispError::GenericError(
+                    "Could not convert complex to integer".to_string(),
+                ))
+            }
+        }
+        _ => Err(LispError::GenericError(
+            "Could not convert non-number to integer".to_string(),
+        )),
+    }
+}
+
 fn num_mod(args: Vec<LispVal>) -> LispResult<LispVal> {
     // TODO: Other number types
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
-        [LispVal::Integer(n), LispVal::Integer(m)] => Ok(LispVal::Integer(n % m)),
+        [m, n] => {
+            let m = num_to_int(m)?;
+            let n = num_to_int(n)?;
+            Ok(LispVal::Integer(m % n))
+        }
         _ =>
         // TODO: Typeerror?
         {
