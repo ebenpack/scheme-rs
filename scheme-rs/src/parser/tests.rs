@@ -98,7 +98,7 @@ fn parse_block_comment() {
 }
 
 #[test]
-fn parse_number() {
+fn parse_integer_number() {
     // Decimal
     assert_eq!(number.parse("1"), Ok(("", LispVal::Integer(1))));
     assert_eq!(number.parse("1729"), Ok(("", LispVal::Integer(1729))));
@@ -136,6 +136,137 @@ fn parse_number() {
     assert_eq!(
         number.parse("#x-DEADBEEF"),
         Ok(("", LispVal::Integer(-3735928559)))
+    );
+}
+
+#[test]
+fn parse_float_number() {
+    // Decimal
+    assert_eq!(number.parse("1."), Ok(("", LispVal::Float(1.0))));
+    assert_eq!(number.parse("1.0"), Ok(("", LispVal::Float(1.0))));
+    assert_eq!(number.parse("1.2"), Ok(("", LispVal::Float(1.2))));
+    assert_eq!(number.parse("1729."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("1729.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("1729.9"), Ok(("", LispVal::Float(1729.9))));
+    assert_eq!(number.parse("+1729."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("+1729.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("+1729.6"), Ok(("", LispVal::Float(1729.6))));
+    assert_eq!(
+        number.parse("1729.00012345"),
+        Ok(("", LispVal::Float(1729.00012345)))
+    );
+    assert_eq!(number.parse("-1729."), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(number.parse("-1729.0"), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(number.parse("-1729.1"), Ok(("", LispVal::Float(-1729.1))));
+    assert_eq!(
+        number.parse("-1729.0000123"),
+        Ok(("", LispVal::Float(-1729.0000123)))
+    );
+    assert_eq!(number.parse("#d1729."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#d1729.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#d1729.1"), Ok(("", LispVal::Float(1729.1))));
+    assert_eq!(
+        number.parse("#d1729.0000123"),
+        Ok(("", LispVal::Float(1729.0000123)))
+    );
+    assert_eq!(number.parse("#d+1729."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#d+1729.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#d+1729.4"), Ok(("", LispVal::Float(1729.4))));
+    assert_eq!(number.parse("#d-1729."), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(number.parse("#d-1729.0"), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(number.parse("#d-1729.8"), Ok(("", LispVal::Float(-1729.8))));
+    // Binary
+    assert_eq!(
+        number.parse("#b11011000001."),
+        Ok(("", LispVal::Float(1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b11011000001.0"),
+        Ok(("", LispVal::Float(1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b11011000001.001"),
+        Ok(("", LispVal::Float(1729.125)))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001."),
+        Ok(("", LispVal::Float(1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001.0"),
+        Ok(("", LispVal::Float(1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b+11011000001.001"),
+        Ok(("", LispVal::Float(1729.125)))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001."),
+        Ok(("", LispVal::Float(-1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001.0"),
+        Ok(("", LispVal::Float(-1729.0)))
+    );
+    assert_eq!(
+        number.parse("#b-11011000001.001"),
+        Ok(("", LispVal::Float(-1729.125)))
+    );
+    // Octal
+    assert_eq!(number.parse("#o3301."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#o3301.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(
+        number.parse("#o3301.732"),
+        Ok(("", LispVal::Float(1729.92578125)))
+    );
+    assert_eq!(number.parse("#o+3301."), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(number.parse("#o+3301.0"), Ok(("", LispVal::Float(1729.0))));
+    assert_eq!(
+        number.parse("#o+3301.732"),
+        Ok(("", LispVal::Float(1729.92578125)))
+    );
+    assert_eq!(number.parse("#o-3301."), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(number.parse("#o-3301.0"), Ok(("", LispVal::Float(-1729.0))));
+    assert_eq!(
+        number.parse("#o-3301.227"),
+        Ok(("", LispVal::Float(-1729.294921875)))
+    );
+    // Hex
+    assert_eq!(
+        number.parse("#xDEADBEEF."),
+        Ok(("", LispVal::Float(3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.0"),
+        Ok(("", LispVal::Float(3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#xDEADBEEF.CAFE"),
+        Ok(("", LispVal::Float(3735928559.792938)))
+    );
+    assert_eq!(
+        number.parse("#x+DEADBEEF."),
+        Ok(("", LispVal::Float(3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#x+DEADBEEF.0"),
+        Ok(("", LispVal::Float(3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#x+DEADBEEF.CAFE"),
+        Ok(("", LispVal::Float(3735928559.792938)))
+    );
+    assert_eq!(
+        number.parse("#x-DEADBEEF."),
+        Ok(("", LispVal::Float(-3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#x-DEADBEEF.0"),
+        Ok(("", LispVal::Float(-3735928559.0)))
+    );
+    assert_eq!(
+        number.parse("#x-DEADBEEF.CAFEBABE"),
+        Ok(("", LispVal::Float(-3735928559.792949)))
     );
 }
 
