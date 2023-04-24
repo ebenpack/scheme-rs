@@ -109,6 +109,28 @@ impl fmt::Display for LispVal {
             result
         }
 
+        fn format_number(n: &LispVal) -> String {
+            match n {
+                LispVal::Integer(n) => format!("{}", n),
+                LispVal::Float(n) => format!("{}", n),
+                LispVal::Rational(r) => {
+                    if *r.denom() == 0 {
+                        format!("{}", r.numer())
+                    } else {
+                        format!("{}/{}", r.numer(), r.denom())
+                    }
+                }
+                LispVal::Complex(c) => {
+                    if c.im == 0.0 {
+                        format!("{}", c.re)
+                    } else {
+                        format!("{}+{}i", c.re, c.im)
+                    }
+                }
+                _ => unreachable!(),
+            }
+        }
+
         fn format_helper(val: &LispVal) -> String {
             // TODO: Better number formatting
             match val {
@@ -116,10 +138,10 @@ impl fmt::Display for LispVal {
                 LispVal::List(xs) => format!("({})", format_list(xs)),
                 LispVal::DottedList(h, t) => format!("({} . {})", format_list(h), t),
                 LispVal::Vector(xs) => format!("#({})", format_list(xs)),
-                LispVal::Integer(n) => n.to_string(),
-                LispVal::Float(n) => n.to_string(),
-                LispVal::Complex(n) => n.to_string(),
-                LispVal::Rational(n) => n.to_string(),
+                n @ LispVal::Integer(_) => format_number(n),
+                n @ LispVal::Float(_) => format_number(n),
+                n @ LispVal::Complex(_) => format_number(n),
+                n @ LispVal::Rational(_) => format_number(n),
                 LispVal::String(s) => format!("\"{}\"", s),
                 LispVal::Char(c) => format_char(c),
                 LispVal::PrimitiveFunc(f) => format!("#<procedure:{}>", f.name),

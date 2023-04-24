@@ -196,7 +196,7 @@ fn num_lte(args: Vec<LispVal>) -> LispResult<LispVal> {
 
 fn num_to_int(n: &LispVal) -> LispResult<i64> {
     match n {
-        a @ LispVal::Integer(n) => Ok(*n),
+        LispVal::Integer(n) => Ok(*n),
         LispVal::Float(n) => {
             if n.fract() == 0.0 {
                 Ok(*n as i64)
@@ -252,7 +252,7 @@ fn num_mod(args: Vec<LispVal>) -> LispResult<LispVal> {
 fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 2))?;
     match &args[..] {
-        [LispVal::Integer(n)] => Ok(LispVal::String(format!("{}", n))),
+        [n@LispVal::Integer(_)] => Ok(LispVal::String(format!("{}", n))),
         [LispVal::Integer(n), LispVal::Integer(base)] => {
             match base {
                 2 | 8 | 10 | 16 => {
@@ -266,19 +266,13 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
                 ))
             }
         }
-        [LispVal::Float(n)] => Ok(LispVal::String(format!("{}", n))),
+        [n@LispVal::Float(_)] => Ok(LispVal::String(format!("{}", n))),
         [LispVal::Float(_), LispVal::Integer(_)] => {
             Err(LispError::GenericError(
                 "number->string: inexact numbers can only be printed in base 10".to_string(),
             ))
         },
-        [LispVal::Rational(r)] => {
-            if *r.denom() == 0 {
-                Ok(LispVal::String(format!("{}", r.numer())))
-            } else {
-                Ok(LispVal::String(format!("{}/{}", r.numer(), r.denom())))
-            }
-        },
+        [n@LispVal::Rational(_)] => Ok(LispVal::String(format!("{}", n))),
         [LispVal::Rational(r), LispVal::Integer(base)] => {
             match base {
                 2 | 8 | 10 | 16 => {
@@ -298,13 +292,7 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
                 ))
             }
         }
-        [LispVal::Complex(c)] => {
-            if c.im == 0.0 {
-                Ok(LispVal::String(format!("{}", c.re)))
-            } else {
-                Ok(LispVal::String(format!("{}+{}i", c.re, c.im)))
-            }
-        },
+        [n@LispVal::Complex(_)] => Ok(LispVal::String(format!("{}", n))),
         [LispVal::Complex(_), LispVal::Integer(_)] => {
             // TODO: Technically we should be able to format exact complex #s
             Err(LispError::GenericError(
