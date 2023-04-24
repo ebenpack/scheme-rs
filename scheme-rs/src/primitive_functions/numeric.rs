@@ -321,15 +321,41 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
     }
 }
 
-fn is_number(args: Vec<LispVal>) -> LispResult<LispVal> {
+fn is_integer(args: &[LispVal]) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
-    Ok(LispVal::Bool(matches!(
-        args.first(),
-        Some(LispVal::Integer(_))
-            | Some(LispVal::Float(_))
-            | Some(LispVal::Rational(_))
-            | Some(LispVal::Complex(_))
-    )))
+    match &args[..] {
+        [LispVal::Integer(_)] => Ok(LispVal::Bool(true)),
+        [_] => Ok(LispVal::Bool(false)),
+        _ => unreachable!(),
+    }
+}
+
+fn is_rational(args: &[LispVal]) -> LispResult<LispVal> {
+    check_arity(&args, Arity::MinMax(1, 1))?;
+    match &args[..] {
+        [LispVal::Rational(_)] => Ok(LispVal::Bool(true)),
+        args => is_integer(args),
+    }
+}
+
+fn is_real(args: &[LispVal]) -> LispResult<LispVal> {
+    check_arity(&args, Arity::MinMax(1, 1))?;
+    match &args[..] {
+        [LispVal::Float(_)] => Ok(LispVal::Bool(true)),
+        args => is_rational(args),
+    }
+}
+
+fn is_complex(args: &[LispVal]) -> LispResult<LispVal> {
+    check_arity(&args, Arity::MinMax(1, 1))?;
+    match &args[..] {
+        [LispVal::Complex(_)] => Ok(LispVal::Bool(true)),
+        args => is_real(args),
+    }
+}
+
+fn is_number(args: &[LispVal]) -> LispResult<LispVal> {
+    is_complex(args)
 }
 
 pub fn numeric_primitives() -> Bindings {
@@ -346,15 +372,15 @@ pub fn numeric_primitives() -> Bindings {
         mk_prim_fn_binding("<=", num_lte),
         mk_prim_fn_binding("modulo", num_mod),
         mk_prim_fn_binding("number->string", num_to_string),
-        mk_prim_fn_binding("number?", is_number),
+        mk_prim_fn_binding("integer?", |args| is_integer(&args)),
+        mk_prim_fn_binding("rational?", |args| is_rational(&args)),
+        mk_prim_fn_binding("real?", |args| is_real(&args)),
+        mk_prim_fn_binding("complex?", |args| is_complex(&args)),
+        mk_prim_fn_binding("number?", |args| is_number(&args)),
         // TODO!
         // mk_prim_fn_binding("quotient", num_quotient),
         // mk_prim_fn_binding("remainder", num_rem),
         // mk_prim_fn_binding("sin", num_sine),
         // mk_prim_fn_binding("cos", num_cos),
-        // mk_prim_fn_binding("complex?", is_complex),
-        // mk_prim_fn_binding("real?", is_real),
-        // mk_prim_fn_binding("rational?", is_rational),
-        // mk_prim_fn_binding("integer?", is_integer),
     ])
 }
