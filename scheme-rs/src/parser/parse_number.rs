@@ -112,13 +112,13 @@ fn float_converter(m: f64, base: f64, size: i32) -> f64 {
 fn float_decimal(input: &str) -> IResult<&str, LispVal> {
     float_helper(input, |input| {
         separated_pair(digit1, char('.'), digit0)
-            .map(|(n, m)| {
-                let n = i64::from_str_radix(n, 10).unwrap();
+            .map(|(n, m): (&str, &str)| {
+                let n = n.parse::<i64>().unwrap();
                 let (size, m) = if m.is_empty() {
                     (1, 0)
                 } else {
                     let size = m.chars().count();
-                    (size, i64::from_str_radix(m, 10).unwrap())
+                    (size, m.parse::<i64>().unwrap())
                 };
                 let base: f64 = 10.0;
                 n as f64 + float_converter(m as f64, base, size as i32)

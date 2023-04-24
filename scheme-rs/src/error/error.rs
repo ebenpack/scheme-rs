@@ -52,7 +52,7 @@ impl fmt::Display for LispError {
                     Arity::MinMax(min, max) => {
                         write!(f, "arity mismatch;\nthe expected number of arguments does not match the given number\nexpected: {}\ngiven: {}{}", 
                             if min == max { format!("{}", min) } else { format!("between {} and {}", min, max) },
-                            format!("{}", found),
+                            found,
                             args_error
                         )
                     }

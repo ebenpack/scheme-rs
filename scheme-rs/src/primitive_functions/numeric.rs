@@ -310,8 +310,8 @@ fn num_to_string(args: Vec<LispVal>) -> LispResult<LispVal> {
 }
 
 fn is_integer(args: &[LispVal]) -> LispResult<LispVal> {
-    check_arity(&args, Arity::MinMax(1, 1))?;
-    match &args[..] {
+    check_arity(args, Arity::MinMax(1, 1))?;
+    match args {
         [LispVal::Integer(_)] => Ok(LispVal::Bool(true)),
         [_] => Ok(LispVal::Bool(false)),
         _ => unreachable!(),
@@ -319,24 +319,24 @@ fn is_integer(args: &[LispVal]) -> LispResult<LispVal> {
 }
 
 fn is_rational(args: &[LispVal]) -> LispResult<LispVal> {
-    check_arity(&args, Arity::MinMax(1, 1))?;
-    match &args[..] {
+    check_arity(args, Arity::MinMax(1, 1))?;
+    match args {
         [LispVal::Rational(_)] => Ok(LispVal::Bool(true)),
         args => is_integer(args),
     }
 }
 
 fn is_real(args: &[LispVal]) -> LispResult<LispVal> {
-    check_arity(&args, Arity::MinMax(1, 1))?;
-    match &args[..] {
+    check_arity(args, Arity::MinMax(1, 1))?;
+    match args {
         [LispVal::Float(_)] => Ok(LispVal::Bool(true)),
         args => is_rational(args),
     }
 }
 
 fn is_complex(args: &[LispVal]) -> LispResult<LispVal> {
-    check_arity(&args, Arity::MinMax(1, 1))?;
-    match &args[..] {
+    check_arity(args, Arity::MinMax(1, 1))?;
+    match args {
         [LispVal::Complex(_)] => Ok(LispVal::Bool(true)),
         args => is_real(args),
     }
