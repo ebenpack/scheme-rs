@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::thread::panicking;
 
 use crate::environment::{Bindings, Env};
 use crate::error::{LispError, LispResult};
@@ -224,16 +225,6 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
         v @ LispVal::Complex(_) => Ok(v.clone()),
         v @ LispVal::Vector(_) => Ok(v.clone()),
         v @ LispVal::Bool(_) => Ok(v.clone()),
-        // eval _ val@(Integer _) = return val
-        // eval _ (Rational val) =
-        //   if denominator val == 1
-        //     then return $ Integer $ numerator val
-        //     else return $ Rational val
-        // eval _ val@(Float _) = return val
-        // eval _ (Complex val) =
-        //   if imagPart val == 0
-        //     then return $ Float $ realPart val
-        //     else return $ Complex val
         LispVal::Atom(ident) => match env.lookup(ident) {
             None => Err(LispError::UnboundVar(
                 "Getting an unbound variable".to_string(),
@@ -268,6 +259,11 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
             [LispVal::Atom(ref s), LispVal::Atom(var), form] if s == "define" => {
                 let value = eval(&env.clone(), form)?;
                 define_var(env.clone(), var, value)
+            }
+            [LispVal::Atom(ref s), val] if s == "eval" => {
+                // TODO: Is that all there is?
+                let val = eval(&env.clone(), val)?;
+                eval(&env.clone(), &val)
             }
 
             [LispVal::Atom(ref s), LispVal::List(params), body @ ..] if s == "define" => {
