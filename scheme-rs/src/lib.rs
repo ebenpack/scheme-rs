@@ -194,7 +194,12 @@ mod tests {
             let results = results.iter().take(results.len() - 1);
 
             for result in results.filter(|&val| *val != LispVal::Void) {
-                assert_eq!(result, &LispVal::Bool(true));
+                assert_eq!(
+                    result,
+                    &LispVal::Bool(true),
+                    "{}",
+                    schemer_test_path.path().display()
+                );
             }
         }
 
