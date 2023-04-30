@@ -346,6 +346,19 @@ fn is_number(args: &[LispVal]) -> LispResult<LispVal> {
     is_complex(args)
 }
 
+fn is_zero(args: Vec<LispVal>) -> LispResult<LispVal> {
+    check_arity(&args, Arity::MinMax(1, 1))?;
+    if let [n] = &args[..] {
+        match cast(n, &LispVal::Integer(0))? {
+            (LispVal::Integer(0), _) => Ok(LispVal::Bool(true)),
+            (LispVal::Float(n), _) => Ok(LispVal::Bool(n == 0.0)),
+            _ => Ok(LispVal::Bool(false)),
+        }
+    } else {
+        unreachable!()
+    }
+}
+
 pub fn numeric_primitives() -> Bindings {
     HashMap::from([
         mk_prim_fn_binding("+", num_add),
@@ -359,6 +372,7 @@ pub fn numeric_primitives() -> Bindings {
         mk_prim_fn_binding(">=", num_gte),
         mk_prim_fn_binding("<=", num_lte),
         mk_prim_fn_binding("modulo", num_mod),
+        mk_prim_fn_binding("zero?", is_zero),
         mk_prim_fn_binding("number->string", num_to_string),
         mk_prim_fn_binding("integer?", |args| is_integer(&args)),
         mk_prim_fn_binding("rational?", |args| is_rational(&args)),
