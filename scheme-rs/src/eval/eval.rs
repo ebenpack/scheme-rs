@@ -234,19 +234,27 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
         },
         LispVal::List(xs) => match &xs[..] {
             [LispVal::Atom(ref s), val] if s == "quote" => Ok(val.clone()),
-            [LispVal::Atom(ref s), expr1, expr2] if s == "or" => {
-                let result = eval(&env.clone(), expr1)?;
-                match result {
-                    LispVal::Bool(true) => Ok(result),
-                    _ => eval(&env.clone(), expr2),
+            [LispVal::Atom(ref s), ref xs @ ..] if s == "or" => {
+                for x in xs.iter() {
+                    let result = eval(&env.clone(), x)?;
+                    if !matches!(result, LispVal::Bool(false)) {
+                        return Ok(result);
+                    }
                 }
+                Ok(LispVal::Bool(false))
             }
-            [LispVal::Atom(ref s), expr1, expr2] if s == "and" => {
-                let result = eval(&env.clone(), expr1)?;
-                match result {
-                    LispVal::Bool(false) => Ok(result),
-                    _ => eval(&env.clone(), expr2),
+            [LispVal::Atom(ref s), ref xs @ ..] if s == "and" => {
+                let len = xs.len();
+                for (i, x) in xs.iter().enumerate() {
+                    let result = eval(&env.clone(), x)?;
+                    if matches!(result, LispVal::Bool(false)) {
+                        return Ok(result);
+                    }
+                    if i == len - 1 {
+                        return Ok(result);
+                    }
                 }
+                Ok(LispVal::Bool(true))
             }
             [LispVal::Atom(ref s), predicate, consequent, alternative] if s == "if" => {
                 let result = eval(&env.clone(), predicate)?;
