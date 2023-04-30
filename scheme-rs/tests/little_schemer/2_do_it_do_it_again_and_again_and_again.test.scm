@@ -5,9 +5,9 @@
 (define lat?
   (lambda (l)
     (cond
-      ((null? l) #t)
-      ((atom? (car l)) (lat? (cdr l)))
-      (else #f))))
+      [(null? l) #t]
+      [(atom? (car l)) (lat? (cdr l))]
+      [else #f])))
 
 (test (lat? '(Jack Sprat could eat no chicken fat)) #t)
 (test (lat? '((Jack) Sprat could eat no chicken fat)) #f)

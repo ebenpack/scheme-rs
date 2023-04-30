@@ -23,7 +23,7 @@ cargo-build:
 .PHONY: web
 web:
 	wasm-pack build --release
-	yarn --cwd www install --frozen-lockfile 
+	yarn --cwd www install --frozen-lockfile
 	yarn --cwd www build
 
 .PHONY: serve

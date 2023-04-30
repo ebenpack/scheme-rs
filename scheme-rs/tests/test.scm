@@ -43,7 +43,7 @@
 ;         (+ x 4))
 ;     (sum_ pi-term a pi-next b))
 
-; (define (simpsons f a b n) 
+; (define (simpsons f a b n)
 ;     (define h (/ (- b a) n))
 ;     (define (y k)
 ;         (f (+ a (* k h))))
@@ -81,7 +81,7 @@
 
 ; (define (wallis n)
 ;     (define (term n)
-;         (* 
+;         (*
 ;             (/ (* 2 n) (- (* 2 n) 1))
 ;             (/ (* 2 n) (+ (* 2 n) 1))))
 
@@ -107,14 +107,14 @@
 ;           ((= x 2) #t)
 ;            (else
 ;             (prime-helper x 2))))
-  
+
 ; (define (sum-of-squares-of-primes a b)
 ;     (filtered-accumulate + prime? 0 square a inc b))
 
 ; (define tolerance 0.00001)
 ; (define (fixed-point f first-guess)
 ;     (define (close-enough? v1 v2)
-;         (< (abs (- v1 v2)) 
+;         (< (abs (- v1 v2))
 ;         tolerance))
 ;     (define (try guess)
 ;         (let ((next (f guess)))
@@ -125,7 +125,7 @@
 
 ; (define (average . args) (/ (foldr + 0 args) (length args)))
 ; (define (sqrt x)
-;     (fixed-point 
+;     (fixed-point
 ;      (lambda (y) (average y (/ x y)))
 ;      1.0))
 
@@ -134,11 +134,11 @@
 ;         (lambda (y) (average y (+ 1 (/ 1 y))))
 ;         2.0))
 
-; (define (double_ f) 
+; (define (double_ f)
 ;     (lambda (x) (f (f x))))
 
 ; (define (nth fn n)
-;     (if (= 1 n) 
+;     (if (= 1 n)
 ;         fn
 ;         (compose fn (nth fn (- n 1)))))
 
@@ -151,8 +151,8 @@
 ; (define (f111-rec n)
 ;     (if (< n 3)
 ;         3
-;         (+ (f111-rec (- n 1)) 
-;             (* 2 (f111-rec (- n 2))) 
+;         (+ (f111-rec (- n 1))
+;             (* 2 (f111-rec (- n 2)))
 ;             (* 3 (f111-rec (- n 3))))))
 
 
@@ -192,8 +192,8 @@
 
 ; (define (reverse_ ls)
 ;     (define (go ls acc)
-;         (if (empty? ls) 
-;             acc 
+;         (if (empty? ls)
+;             acc
 ;             (go (cdr ls) (cons (car ls) acc))))
 ;     (go ls '()))
 
@@ -231,18 +231,18 @@
 ; ; (vector-set! temp 3 9)
 ; ; (write "Post-mutation")
 ; ; (write temp)
-; ; 
-; ; (define (mut v i val) 
+; ;
+; ; (define (mut v i val)
 ; ;     (write "In mut, pre-mutation")
 ; ;     (write tempssadasddas)
 ; ;     (write v)
 ; ;     (write v)
-; ;     (vector-set! v i val) 
+; ;     (vector-set! v i val)
 ; ;     (write "In mut, post-mutation")
 ; ;     (write temp)
 ; ;     (write v)
 ; ;     v)
-; ; 
+; ;
 ; ; (define (foo a b) (write a) (write b))
 ; ; (foo '(1 2 3) 2)
 ; ; (define temp2 temp)

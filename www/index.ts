@@ -36,11 +36,11 @@ const main = async () => {
 (filter even?  '(1 2 3 4 5 6 7 8 9 10))
 (let* ([a 5] [b (+ a 10)]) (+ b 20))
 (letrec
-    ([is-even? 
+    ([is-even?
         (lambda (n)
             (if (zero? n) #t
                 (is-odd? (sub1 n))))]
-    [is-odd? 
+    [is-odd?
         (lambda (n)
             (if (zero? n) #f
                 (is-even? (sub1 n))))])
@@ -53,7 +53,7 @@ const main = async () => {
             basicSetup,
             oneDark,
             keymap.of([indentWithTab]),
-            gutter({ class: "cm-mygutter" }), 
+            gutter({ class: "cm-mygutter" }),
             StreamLanguage.define(scheme)
         ]
     });

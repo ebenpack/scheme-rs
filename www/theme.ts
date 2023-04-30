@@ -25,18 +25,18 @@ export const oneDarkTheme = EditorView.theme({
       backgroundColor: background,
       fontSize: "1.3em"
     },
-  
+
     ".cm-content": {
       caretColor: cursor
     },
-  
+
     "&.cm-focused .cm-cursor": {borderLeftColor: cursor},
     "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {backgroundColor: selection},
-  
+
     ".cm-panels": {backgroundColor: darkBackground, color: ivory},
     ".cm-panels.cm-panels-top": {borderBottom: "2px solid black"},
     ".cm-panels.cm-panels-bottom": {borderTop: "2px solid black"},
-  
+
     ".cm-searchMatch": {
       backgroundColor: "#72a1ff59",
       outline: "1px solid #457dff"
@@ -44,32 +44,32 @@ export const oneDarkTheme = EditorView.theme({
     ".cm-searchMatch.cm-searchMatch-selected": {
       backgroundColor: "#6199ff2f"
     },
-  
+
     ".cm-activeLine": {backgroundColor: highlightBackground},
     ".cm-selectionMatch": {backgroundColor: "#aafe661a"},
-  
+
     "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
       backgroundColor: "#bad0f847",
       outline: "1px solid #515a6b"
     },
-  
+
     ".cm-gutters": {
       backgroundColor: background,
       color: "white",
       border: "none",
       borderRight: "1px solid white"
     },
-  
+
     ".cm-activeLineGutter": {
       backgroundColor: highlightBackground
     },
-  
+
     ".cm-foldPlaceholder": {
       backgroundColor: "transparent",
       border: "none",
       color: "#ddd"
     },
-  
+
     ".cm-tooltip": {
       border: "none",
       backgroundColor: tooltipBackground
@@ -89,7 +89,7 @@ export const oneDarkTheme = EditorView.theme({
       }
     }
   }, {dark: true})
-  
+
   /// The highlighting style for code in the One Dark theme.
   export const oneDarkHighlightStyle = HighlightStyle.define([
     {tag: t.keyword,

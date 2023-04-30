@@ -3,9 +3,11 @@
 
 (define (rember a l)
   (cond
-    ((null? l) '())
-    ((eq? a (car l)) (cdr l))
-    (else (cons (car l) (rember a (cdr l))))))
+    [(null? l) '()]
+    [(eq? a (car l))
+      (cdr l)]
+    [else
+      (cons (car l) (rember a (cdr l)))]))
 
 (test
   (rember 'mint '(lamb chops and mint jelly))
@@ -19,10 +21,11 @@
 
 (define (firsts l)
   (cond
-    ((null? l) '())
-    (else (cons (car (car l)) (firsts (cdr l))))))
+    [(null? l) '()]
+    [else
+      (cons (car (car l)) (firsts (cdr l)))]))
 
-(test 
+(test
   (firsts '((apple peach pumpkin) (plum pear cherry) (grape raisin pea) (bean carrot eggplant)))
   '(apple plum grape bean))
 (test
@@ -32,8 +35,9 @@
 
 (define (seconds l)
   (cond
-    ((null? l) '())
-    (else (cons (car (cdr (car l))) (seconds (cdr l))))))
+    [(null? l) '()]
+    [else
+      (cons (car (cdr (car l))) (seconds (cdr l)))]))
 
 (test
   (seconds '((a b) (c d) (e f)))
@@ -41,9 +45,11 @@
 
 (define (insertR new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons old (cons new (cdr l))))
-    (else (cons (car l) (insertR new old (cdr l))))))
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons old (cons new (cdr l)))]
+    [else (cons (car l)
+      (insertR new old (cdr l)))]))
 
 (test
   (insertR 'topping 'fudge '(ice cream with fudge for dessert))
@@ -55,9 +61,11 @@
 
 (define (insertL new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons new l))
-    (else (cons (car l) (insertL new old (cdr l))))))
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons new l)]
+    [else (cons (car l)
+      (insertL new old (cdr l)))]))
 
 (test
   (insertL 'topping 'fudge '(ice cream with fudge for dessert))
@@ -68,9 +76,11 @@
 
 (define (subst new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons new (cdr l)))
-    (else (cons (car l) (subst new old (cdr l))))))
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons new (cdr l))]
+    [else (cons (car l)
+      (subst new old (cdr l)))]))
 
 (test
   (subst 'topping 'fudge '(ice cream with fudge for dessert))
@@ -78,9 +88,11 @@
 
 (define (subst2 new o1 o2 l)
   (cond
-    ((null? l) '())
-    ((or (eq? o1 (car l)) (eq? o2 (car l))) (cons new (cdr l)))
-    (else (cons (car l) (subst2 new o1 o2 (cdr l))))))
+    [(null? l) '()]
+    [(or (eq? o1 (car l)) (eq? o2 (car l)))
+      (cons new (cdr l))]
+    [else (cons (car l)
+      (subst2 new o1 o2 (cdr l)))]))
 
 (test
   (subst2 'vanilla 'chocolate 'banana '(banana ice cream with chocolate topping))
@@ -88,9 +100,11 @@
 
 (define (multirember a l)
   (cond
-    ((null? l) '())
-    ((eq? a (car l)) (multirember a (cdr l)))
-    (else (cons (car l) (multirember a (cdr l))))))
+    [(null? l) '()]
+    [(eq? a (car l))
+      (multirember a (cdr l))]
+    [else
+      (cons (car l) (multirember a (cdr l)))]))
 
 (test
   (multirember 'cup '(coffee cup tea cup and hick cup))
@@ -98,9 +112,11 @@
 
 (define (multiinsertR new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons old (cons new (multiinsertR new old (cdr l)))))
-    (else (cons (car l) (multiinsertR new old (cdr l))))))
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons old (cons new (multiinsertR new old (cdr l))))]
+    [else
+      (cons (car l) (multiinsertR new old (cdr l)))]))
 
 (test
   (multiinsertR 'new 'old '(old one old two old three))
@@ -108,9 +124,11 @@
 
 (define (multiinsertL new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons new (cons old (multiinsertL new old (cdr l)))))
-    (else (cons (car l) (multiinsertL new old (cdr l))))))
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons new (cons old (multiinsertL new old (cdr l))))]
+    [else
+      (cons (car l) (multiinsertL new old (cdr l)))]))
 
 (test
   (multiinsertL 'new 'old '(old one old two old three))
@@ -118,10 +136,12 @@
 
 (define (multisubst new old l)
   (cond
-    ((null? l) '())
-    ((eq? old (car l)) (cons new (multisubst new old (cdr l))))
-    (else (cons (car l) (multisubst new old (cdr l))))))
-  
+    [(null? l) '()]
+    [(eq? old (car l))
+      (cons new (multisubst new old (cdr l)))]
+    [else
+      (cons (car l) (multisubst new old (cdr l)))]))
+
 (test
   (multisubst 'new 'old '(old thing one old thing two old three))
   '(new thing one new thing two new three))
