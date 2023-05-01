@@ -144,8 +144,7 @@ mod tests {
         assert_eq!(t.eval(thingy), "#t");
     }
 
-    #[test]
-    fn test_little_schemer() -> Result<(), String> {
+    fn run_tests_in_folder(dir: &str) -> Result<(), String> {
         // TODO: Move this test to the test dir?
         use std::env;
         use std::fs::File;
@@ -153,8 +152,9 @@ mod tests {
         use std::path::Path;
 
         let schemer_test_dir_str = format!(
-            "{}/tests/little_schemer/",
-            env::var("CARGO_MANIFEST_DIR").unwrap()
+            "{}/tests/{}/",
+            env::var("CARGO_MANIFEST_DIR").unwrap(),
+            dir
         );
         let schemer_test_dir_path = Path::new(&schemer_test_dir_str);
 
@@ -204,6 +204,16 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn test_little_schemer() -> Result<(), String> {
+        run_tests_in_folder("little_schemer")
+    }
+
+    #[test]
+    fn test_seasoned_schemer() -> Result<(), String> {
+        run_tests_in_folder("seasoned_schemer")
     }
 
     #[test]
