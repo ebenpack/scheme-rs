@@ -77,7 +77,7 @@ pub fn eval(input: &str, ports: Ports) -> String {
 #[cfg(test)]
 mod tests {
 
-    use std::{cell::RefCell, ops::Deref, rc::Rc};
+    use std::{cell::RefCell, fs::DirEntry, ops::Deref, rc::Rc};
 
     use super::*;
 
@@ -144,73 +144,87 @@ mod tests {
         assert_eq!(t.eval(thingy), "#t");
     }
 
-    fn run_tests_in_folder(dir: &str) -> Result<(), String> {
-        // TODO: Move this test to the test dir?
-        use std::env;
+    fn run_tests_in_file(test_path: &DirEntry) -> Result<(), String> {
         use std::fs::File;
         use std::io::prelude::*;
-        use std::path::Path;
-
-        let schemer_test_dir_str =
-            format!("{}/tests/{}/", env::var("CARGO_MANIFEST_DIR").unwrap(), dir);
-        let schemer_test_dir_path = Path::new(&schemer_test_dir_str);
-
-        for test_file_result in schemer_test_dir_path
-            .read_dir()
-            .map_err(|_| "Error reading test directory")?
+        if !test_path
+            .file_name()
+            .into_string()
+            .map_err(|_| "Error converting test file name to string")?
+            .ends_with("test.scm")
         {
-            let schemer_test_path = test_file_result.map_err(|_| "Error reading file")?;
-            if !schemer_test_path
-                .file_name()
-                .into_string()
-                .map_err(|_| "Error converting test file name to string")?
-                .ends_with("test.scm")
-            {
-                continue;
-            }
-            let mut file = String::new();
-            File::open(schemer_test_path.path())
-                .map_err(|_| "Error opening test file")?
-                .read_to_string(&mut file)
-                .map_err(|_| "Error reading test file to string")?;
+            return Ok(());
+        }
+        let mut file = String::new();
+        File::open(test_path.path())
+            .map_err(|_| "Error opening test file")?
+            .read_to_string(&mut file)
+            .map_err(|_| "Error reading test file to string")?;
 
-            let t = Thingus::new(Box::new(noop));
-            let results = t
-                .eval_blah(&file)
-                .map_err(|err| format!("Error evaluating test file: {}", err))?;
+        let t = Thingus::new(Box::new(noop));
+        let results = t
+            .eval_blah(&file)
+            .map_err(|err| format!("Error evaluating test file: {}", err))?;
 
-            // Kind of a hack for now, but the last expression of the test file will be 'OK
-            // and we'll assert this to ensure we've parsed the entire file successfully
-            assert_eq!(
-                results.last().ok_or("Error retrieving last file result")?,
-                &LispVal::Atom("OK".to_string()),
-                "{}",
-                schemer_test_path.path().display()
-            );
-
-            let results = results.iter().take(results.len() - 1);
-
-            for result in results.filter(|&val| *val != LispVal::Void) {
-                assert_eq!(
-                    result,
-                    &LispVal::Bool(true),
-                    "{}",
-                    schemer_test_path.path().display()
-                );
-            }
+        // Kind of a hack for now, but the last expression of the test file will be 'OK
+        // and we'll assert this to ensure we've parsed the entire file successfully
+        if results.last().ok_or("Error retrieving last file result")?
+            != &LispVal::Atom("OK".to_string())
+        {
+            return Err(format!("{}", test_path.path().display()));
         }
 
+        let results = results.iter().take(results.len() - 1);
+
+        for result in results.filter(|&val| *val != LispVal::Void) {
+            if result != &LispVal::Bool(true) {
+                return Err(format!("{}", test_path.path().display()));
+            }
+        }
         Ok(())
+    }
+
+    fn run_tests_in_directory(dir: &str) -> Result<(), String> {
+        // TODO: Move this test to the test dir?
+        use itertools::Either;
+        use rayon::prelude::*;
+        use std::env;
+        use std::path::Path;
+
+        let test_dir_str = format!("{}/tests/{}/", env::var("CARGO_MANIFEST_DIR").unwrap(), dir);
+        let test_dir_path = Path::new(&test_dir_str);
+
+        let files = test_dir_path
+            .read_dir()
+            .map_err(|_| "Error reading test directory")?
+            .collect::<Vec<_>>();
+
+        let (_, errors): (Vec<()>, Vec<String>) = files
+            .into_par_iter()
+            .map(|test_file_result| {
+                let test_path = test_file_result.map_err(|_| "Error reading file")?;
+                run_tests_in_file(&test_path)
+            })
+            .partition_map(|result| match result {
+                Ok(v) => Either::Left(v),
+                Err(e) => Either::Right(e),
+            });
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors.join("\n"))
+        }
     }
 
     #[test]
     fn test_little_schemer() -> Result<(), String> {
-        run_tests_in_folder("little_schemer")
+        run_tests_in_directory("little_schemer")
     }
 
     #[test]
     fn test_seasoned_schemer() -> Result<(), String> {
-        run_tests_in_folder("seasoned_schemer")
+        run_tests_in_directory("seasoned_schemer")
     }
 
     #[test]
