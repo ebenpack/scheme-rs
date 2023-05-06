@@ -9,9 +9,7 @@ pub fn mk_prim_fn_binding(
 }
 
 pub fn check_arity(args: &[LispVal], arity: Arity) -> LispResult<()> {
-    let len = args
-        .len()
-        .try_into()
+    let len = i8::try_from(args.len())
         .map_err(|_| LispError::GenericError("weird argument length".to_string()))?;
     match arity {
         Arity::Min(min) => {

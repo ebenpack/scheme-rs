@@ -9,13 +9,13 @@ use crate::lisp_val::LispVal;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Arity {
-    Min(u16),
-    MinMax(u16, u16),
+    Min(i8),
+    MinMax(i8, i8),
 }
 
 #[derive(Debug, PartialEq)]
 pub enum LispError {
-    NumArgs(Arity, u16, Vec<LispVal>),
+    NumArgs(Arity, i8, Vec<LispVal>),
     TypeMismatch(String, LispVal),
     Parser(String), // TODO
     BadSpecialForm(String, LispVal),

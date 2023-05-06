@@ -151,11 +151,8 @@ mod tests {
         use std::io::prelude::*;
         use std::path::Path;
 
-        let schemer_test_dir_str = format!(
-            "{}/tests/{}/",
-            env::var("CARGO_MANIFEST_DIR").unwrap(),
-            dir
-        );
+        let schemer_test_dir_str =
+            format!("{}/tests/{}/", env::var("CARGO_MANIFEST_DIR").unwrap(), dir);
         let schemer_test_dir_path = Path::new(&schemer_test_dir_str);
 
         for test_file_result in schemer_test_dir_path
