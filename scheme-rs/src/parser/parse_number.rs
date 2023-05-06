@@ -14,6 +14,27 @@ use nom::{
 };
 use num::{complex::Complex64, Rational64};
 
+enum Base {
+    Binary,
+    Decimal,
+    Hex,
+    Octal,
+}
+
+fn parse_base(input: &str) -> IResult<&str, Base> {
+    let (input, base) = one_of("bdox").parse(input)?;
+
+    let base = match base {
+        'b' => Base::Binary,
+        'd' => Base::Decimal,
+        'o' => Base::Octal,
+        'x' => Base::Hex,
+        _ => unreachable!(),
+    };
+
+    Ok((input, base))
+}
+
 /*--------------
 -- Integer
 --------------*/
@@ -46,13 +67,12 @@ fn integer_binary(input: &str) -> IResult<&str, LispVal> {
 }
 
 fn integer_base(input: &str) -> IResult<&str, LispVal> {
-    let (input, (_, base)) = tuple((char('#'), one_of("bdox"))).parse(input)?;
+    let (input, (_, base)) = tuple((char('#'), parse_base)).parse(input)?;
     match base {
-        'b' => integer_binary(input),
-        'd' => integer_decimal(input),
-        'o' => integer_octal(input),
-        'x' => integer_hex(input),
-        _ => fail(input),
+        Base::Binary => integer_binary(input),
+        Base::Decimal => integer_decimal(input),
+        Base::Octal => integer_octal(input),
+        Base::Hex => integer_hex(input),
     }
 }
 
@@ -184,13 +204,12 @@ fn float_binary(input: &str) -> IResult<&str, LispVal> {
 }
 
 fn float_base(input: &str) -> IResult<&str, LispVal> {
-    let (input, base) = preceded(char('#'), one_of("bdox")).parse(input)?;
+    let (input, base) = preceded(char('#'), parse_base).parse(input)?;
     match base {
-        'b' => float_binary(input),
-        'd' => float_decimal(input),
-        'o' => float_octal(input),
-        'x' => float_hex(input),
-        _ => fail(input),
+        Base::Binary => float_binary(input),
+        Base::Decimal => float_decimal(input),
+        Base::Octal => float_octal(input),
+        Base::Hex => float_hex(input),
     }
 }
 
@@ -225,19 +244,18 @@ fn float(input: &str) -> IResult<&str, LispVal> {
 fn complex(input: &str) -> IResult<&str, LispVal> {
     // Store the base for later if it's there, but don't consume it
     // b/c float/integer will need it
-    let (input, base) = peek(opt(preceded(char('#'), one_of("bdox")))).parse(input)?;
+    let (input, base) = peek(opt(preceded(char('#'), parse_base))).parse(input)?;
     let (input, m) = alt((float, integer)).parse(input)?;
 
     // Just enforce that there is a +/-, because they're optional for
     // the various float/integer parsers
     let (input, _) = peek(alt((char('-'), char('+')))).parse(input)?;
     let (input, n) = match base {
-        Some('b') => alt((float_binary, integer_binary)).parse(input),
-        Some('d') => alt((float_decimal, integer_decimal)).parse(input),
-        Some('o') => alt((float_octal, integer_octal)).parse(input),
-        Some('x') => alt((float_hex, integer_hex)).parse(input),
+        Some(Base::Binary) => alt((float_binary, integer_binary)).parse(input),
+        Some(Base::Decimal) => alt((float_decimal, integer_decimal)).parse(input),
+        Some(Base::Octal) => alt((float_octal, integer_octal)).parse(input),
+        Some(Base::Hex) => alt((float_hex, integer_hex)).parse(input),
         None => alt((float_decimal, integer_decimal)).parse(input),
-        Some(_) => unreachable!(),
     }?;
     let (input, _) = char('i').parse(input)?;
 
@@ -265,19 +283,18 @@ fn complex(input: &str) -> IResult<&str, LispVal> {
 fn rational(input: &str) -> IResult<&str, LispVal> {
     // Store the base for later if it's there, but don't consume it
     // b/c float/integer will need it
-    let (input, base) = peek(opt(preceded(char('#'), one_of("bdox")))).parse(input)?;
+    let (input, base) = peek(opt(preceded(char('#'), parse_base))).parse(input)?;
     let (input, m) = integer.parse(input)?;
 
     let (input, _) = char('/').parse(input)?;
     let (input, _) = peek(none_of("+-")).parse(input)?;
 
     let (input, n) = match base {
-        Some('b') => integer_binary.parse(input),
-        Some('d') => integer_decimal.parse(input),
-        Some('o') => integer_octal.parse(input),
-        Some('x') => integer_hex.parse(input),
+        Some(Base::Binary) => integer_binary.parse(input),
+        Some(Base::Decimal) => integer_decimal.parse(input),
+        Some(Base::Octal) => integer_octal.parse(input),
+        Some(Base::Hex) => integer_hex.parse(input),
         None => integer_decimal.parse(input),
-        Some(_) => unreachable!(),
     }?;
 
     match (m, n) {
