@@ -19,6 +19,38 @@ fn void(_args: Vec<LispVal>) -> LispResult<LispVal> {
     Ok(LispVal::Void)
 }
 
+fn equal(args: Vec<LispVal>) -> LispResult<LispVal> {
+    check_arity(&args, Arity::MinMax(2, 2))?;
+    match &args[..] {
+        [LispVal::DottedList(xs, x), LispVal::DottedList(ys, y)] => {
+            if let LispVal::Bool(false) = equal(vec![(**x).clone(), (**y).clone()])? {
+                return Ok(LispVal::Bool(false));
+            }
+            if xs.len() != ys.len() {
+                return Ok(LispVal::Bool(false));
+            }
+            for (x, y) in xs.iter().zip(ys.iter()) {
+                if let LispVal::Bool(false) = equal(vec![x.clone(), y.clone()])? {
+                    return Ok(LispVal::Bool(false));
+                }
+            }
+            Ok(LispVal::Bool(true))
+        }
+        [LispVal::List(xs), LispVal::List(ys)] => {
+            if xs.len() != ys.len() {
+                return Ok(LispVal::Bool(false));
+            }
+            for (x, y) in xs.iter().zip(ys.iter()) {
+                if let LispVal::Bool(false) = equal(vec![x.clone(), y.clone()])? {
+                    return Ok(LispVal::Bool(false));
+                }
+            }
+            Ok(LispVal::Bool(true))
+        }
+        _ => eq(args),
+    }
+}
+
 fn eq(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(2, 2))?;
     match &args[..] {
@@ -53,7 +85,7 @@ pub fn primitive_functions() -> Bindings {
         mk_prim_fn_binding("void", void),
         mk_prim_fn_binding("eq?", eq),
         mk_prim_fn_binding("eqv?", eq),
-        mk_prim_fn_binding("equal?", eq),
+        mk_prim_fn_binding("equal?", equal),
     ]);
     bindings
 }
