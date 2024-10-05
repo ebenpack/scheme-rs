@@ -150,51 +150,6 @@ fn get_tails(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::rc::Rc;
-
-    #[test]
-    fn test_get_head() {
-        assert_eq!(
-            get_heads(&vec![
-                LispVal::List(Rc::new(vec![LispVal::Integer(1), LispVal::Integer(2)])),
-                LispVal::List(Rc::new(vec![LispVal::Integer(3), LispVal::Integer(4)]))
-            ]),
-            Ok(vec![LispVal::Integer(1), LispVal::Integer(3)])
-        );
-    }
-    #[test]
-    fn test_get_tails() {
-        // [List([Atom("a"), Number(5)]), List([Atom("b"), List([Atom("+"), Atom("a"), Number(10)])])]
-        assert_eq!(
-            get_tails(&vec![
-                LispVal::List(Rc::new(vec![
-                    LispVal::Atom("a".to_string()),
-                    LispVal::Integer(5)
-                ])),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Atom("b".to_string()),
-                    LispVal::List(Rc::new(vec![
-                        LispVal::Atom("+".to_string()),
-                        LispVal::Atom("a".to_string()),
-                        LispVal::Integer(10)
-                    ]))
-                ]))
-            ]),
-            Ok(vec![
-                LispVal::Integer(5),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Atom("+".to_string()),
-                    LispVal::Atom("a".to_string()),
-                    LispVal::Integer(10)
-                ]))
-            ])
-        )
-    }
-}
-
 fn ensure_atoms(atoms: &[LispVal]) -> LispResult<Vec<String>> {
     atoms
         .iter()
@@ -457,4 +412,49 @@ pub fn eval_expression_list(env: &Env, vals: Vec<LispVal>) -> LispResult<Vec<Lis
     vals.iter()
         .map(|val| eval(env, val))
         .collect::<Result<Vec<LispVal>, LispError>>()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::rc::Rc;
+
+    #[test]
+    fn test_get_head() {
+        assert_eq!(
+            get_heads(&vec![
+                LispVal::List(Rc::new(vec![LispVal::Integer(1), LispVal::Integer(2)])),
+                LispVal::List(Rc::new(vec![LispVal::Integer(3), LispVal::Integer(4)]))
+            ]),
+            Ok(vec![LispVal::Integer(1), LispVal::Integer(3)])
+        );
+    }
+    #[test]
+    fn test_get_tails() {
+        // [List([Atom("a"), Number(5)]), List([Atom("b"), List([Atom("+"), Atom("a"), Number(10)])])]
+        assert_eq!(
+            get_tails(&vec![
+                LispVal::List(Rc::new(vec![
+                    LispVal::Atom("a".to_string()),
+                    LispVal::Integer(5)
+                ])),
+                LispVal::List(Rc::new(vec![
+                    LispVal::Atom("b".to_string()),
+                    LispVal::List(Rc::new(vec![
+                        LispVal::Atom("+".to_string()),
+                        LispVal::Atom("a".to_string()),
+                        LispVal::Integer(10)
+                    ]))
+                ]))
+            ]),
+            Ok(vec![
+                LispVal::Integer(5),
+                LispVal::List(Rc::new(vec![
+                    LispVal::Atom("+".to_string()),
+                    LispVal::Atom("a".to_string()),
+                    LispVal::Integer(10)
+                ]))
+            ])
+        )
+    }
 }
