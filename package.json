@@ -1,0 +1,20 @@
+{
+  "name": "scheme-rs-wasm",
+  "type": "module",
+  "collaborators": [
+    "ebenpack <ebenpackwood@gmail.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "scheme_rs_wasm_bg.wasm",
+    "scheme_rs_wasm.js",
+    "scheme_rs_wasm_bg.js",
+    "scheme_rs_wasm.d.ts"
+  ],
+  "main": "scheme_rs_wasm.js",
+  "types": "scheme_rs_wasm.d.ts",
+  "sideEffects": [
+    "./scheme_rs_wasm.js",
+    "./snippets/*"
+  ]
+}
