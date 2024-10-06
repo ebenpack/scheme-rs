@@ -29,6 +29,16 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
         },
         LispVal::List(xs) => match &xs[..] {
             [LispVal::Atom(ref s), val] if s == "quote" => Ok(val.clone()),
+            [LispVal::Atom(ref s), val] if s == "quasiquote" => match val {
+                LispVal::List(xs) => Ok(LispVal::List(Rc::new(unquote_list(env, &xs[..])?))),
+                LispVal::DottedList(xs, x) => {
+                    let unquoted_list = unquote_list(env, &xs[..])?;
+                    Ok(LispVal::DottedList(Rc::new(unquoted_list), x.clone()))
+                }
+                // TODO: Unqote in vector?
+                // LispVal::Vector(rc) => todo!(),
+                _ => Ok(val.clone()),
+            },
             [LispVal::Atom(ref s), ref xs @ ..] if s == "or" => {
                 for x in xs.iter() {
                     let result = eval(&env.clone(), x)?;
@@ -246,6 +256,21 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
             val.clone(),
         )),
     }
+}
+
+fn unquote_list(env: &Env, val: &[LispVal]) -> LispResult<Vec<LispVal>> {
+    let unquoted_list = val[..]
+        .iter()
+        .map(|expr| match expr {
+            ls @ LispVal::List(xs) => match &xs[..] {
+                [LispVal::Atom(s), ref val] if s == "unquote" => eval(env, val),
+                _ => Ok(ls.clone()),
+            },
+            _ => Ok(expr.clone()),
+        })
+        .collect::<LispResult<Vec<LispVal>>>()?;
+
+    Ok(unquoted_list)
 }
 
 fn eval_list(env: &Env, val: &[LispVal]) -> LispResult<LispVal> {
