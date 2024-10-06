@@ -1,171 +1,11 @@
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::thread::panicking;
 
-use crate::environment::{Bindings, Env};
+use crate::environment::Env;
 use crate::error::{LispError, LispResult};
 use crate::lisp_val::{Func, LispVal};
 
-fn eval_list(env: &Env, val: &[LispVal]) -> LispResult<LispVal> {
-    for (i, x) in val.iter().enumerate() {
-        let result = eval(&env.clone(), x);
-        if i == val.len() - 1 {
-            return result;
-        }
-    }
-    Ok(LispVal::Void)
-}
-
-fn eval_args(env: &Env, vals: &[LispVal]) -> LispResult<Vec<LispVal>> {
-    vals.iter()
-        .map(|val| eval(env, val))
-        .collect::<LispResult<Vec<LispVal>>>()
-}
-
-fn eval_cond(env: &Env, xs: &[LispVal]) -> LispResult<LispVal> {
-    let len = xs.len();
-    for (i, x) in xs.iter().enumerate() {
-        match x {
-            LispVal::List(xs) => {
-                match &xs[..] {
-                    // "else" clause is only valid in the final position
-                    [LispVal::Atom(ref s), ref xs @ ..] if s == "else" => {
-                        if i == len - 1 {
-                            return eval_list(env, xs);
-                        } else {
-                            return Err(LispError::GenericError("TODO: B".to_string()));
-                        }
-                    }
-                    arr @ [predicate, ..] => {
-                        let result = eval(env, predicate)?;
-                        match &result {
-                            LispVal::Bool(false) => {
-                                continue;
-                            }
-                            _ => {
-                                return eval_list(env, arr);
-                            }
-                        }
-                    }
-                    _ => return Err(LispError::GenericError("TODO: A".to_string())),
-                }
-            }
-            x => {
-                return Err(LispError::GenericError(format!(
-                    "cond: bad syntax (clause is not a test-value pair) in: {}",
-                    x
-                )))
-            }
-        }
-    }
-    Ok(LispVal::Void)
-}
-
-fn define_var(env: Env, key: &str, value: LispVal) -> LispResult<LispVal> {
-    let already_locally_bound = env.is_bound_local(key);
-    if already_locally_bound {
-        Err(LispError::GenericError(format!(
-            "Duplicate definition for identifier in: {}",
-            key
-        )))
-    } else {
-        env.bind(key, value);
-        Ok(LispVal::Void)
-    }
-}
-
-fn bind_vars(env: &Env, bindings: Bindings) -> Env {
-    env.push_frame(bindings)
-}
-
-fn apply(function: LispVal, args: Vec<LispVal>) -> LispResult<LispVal> {
-    match function {
-        LispVal::PrimitiveFunc(function) => {
-            function.apply(args)
-        }
-        LispVal::Func(function) => {
-            // TODO: Check arg lengths...
-            // TODO: check varargs?
-            let mut bindings = HashMap::new();
-            for (param, value) in function.params.iter().zip(args) {
-                bindings.insert(param.to_owned(), value);
-            }
-            let env = bind_vars(&function.closure, bindings);
-
-            let body = function.body
-                .iter()
-                .map(|expr|
-                    eval(&env, expr)
-                )
-                .collect::<Result<Vec<LispVal>, LispError>>()?;
-
-            Ok(body.last().cloned().unwrap_or(LispVal::Void))
-        }
-        _ => {
-            Err(LispError::GenericError(
-                format!(
-                    "application: not a procedure; expected a procedure that can be applied to arguments; given: {}",
-                    function,
-            )))
-        }
-    }
-}
-
-fn get_heads(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
-    match xs {
-        [] => Ok(vec![]),
-        [LispVal::List(xs), ys @ ..] => match &xs[..] {
-            [x, ..] => {
-                let mut result = get_heads(ys)?;
-                result.insert(0, x.clone());
-                Ok(result)
-            }
-            _ => Err(LispError::GenericError(
-                "Unexpected error (getHeads)".to_string(),
-            )),
-        },
-        _ => Err(LispError::GenericError(
-            "Unexpected error (getHeads)".to_string(),
-        )),
-    }
-}
-
-fn get_tails(xs: &[LispVal]) -> LispResult<Vec<LispVal>> {
-    match xs {
-        [] => Ok(vec![]),
-        [LispVal::List(xs), ys @ ..] => match &xs[..] {
-            [_, xs @ ..] => {
-                let mut result = get_tails(ys)?;
-                let mut new_list = xs.to_vec();
-                new_list.append(&mut result);
-                Ok(new_list)
-            }
-            _ => Err(LispError::GenericError(
-                "Unexpected error (getHeads)".to_string(),
-            )),
-        },
-        _ => Err(LispError::GenericError(
-            "Unexpected error (getHeads)".to_string(),
-        )),
-    }
-}
-
-fn ensure_atoms(atoms: &[LispVal]) -> LispResult<Vec<String>> {
-    atoms
-        .iter()
-        .map(extract_var)
-        .collect::<LispResult<Vec<String>>>()
-}
-
-fn extract_var(val: &LispVal) -> LispResult<String> {
-    match val {
-        LispVal::Atom(atom) => Ok(atom.to_string()),
-        _ => Err(LispError::TypeMismatch(
-            "Expected atom".to_string(),
-            val.clone(),
-        )),
-    }
-}
+use super::util::{bind_vars, define_var, ensure_atoms, get_heads, get_tails};
 
 // TODO: Could eval consume val?
 pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
@@ -408,14 +248,104 @@ pub fn eval(env: &Env, val: &LispVal) -> LispResult<LispVal> {
     }
 }
 
+fn eval_list(env: &Env, val: &[LispVal]) -> LispResult<LispVal> {
+    for (i, x) in val.iter().enumerate() {
+        let result = eval(&env.clone(), x);
+        if i == val.len() - 1 {
+            return result;
+        }
+    }
+    Ok(LispVal::Void)
+}
+
+fn eval_args(env: &Env, vals: &[LispVal]) -> LispResult<Vec<LispVal>> {
+    vals.iter()
+        .map(|val| eval(env, val))
+        .collect::<LispResult<Vec<LispVal>>>()
+}
+
+fn eval_cond(env: &Env, xs: &[LispVal]) -> LispResult<LispVal> {
+    let len = xs.len();
+    for (i, x) in xs.iter().enumerate() {
+        match x {
+            LispVal::List(xs) => {
+                match &xs[..] {
+                    // "else" clause is only valid in the final position
+                    [LispVal::Atom(ref s), ref xs @ ..] if s == "else" => {
+                        if i == len - 1 {
+                            return eval_list(env, xs);
+                        } else {
+                            return Err(LispError::GenericError("TODO: B".to_string()));
+                        }
+                    }
+                    arr @ [predicate, ..] => {
+                        let result = eval(env, predicate)?;
+                        match &result {
+                            LispVal::Bool(false) => {
+                                continue;
+                            }
+                            _ => {
+                                return eval_list(env, arr);
+                            }
+                        }
+                    }
+                    _ => return Err(LispError::GenericError("TODO: A".to_string())),
+                }
+            }
+            x => {
+                return Err(LispError::GenericError(format!(
+                    "cond: bad syntax (clause is not a test-value pair) in: {}",
+                    x
+                )))
+            }
+        }
+    }
+    Ok(LispVal::Void)
+}
+
 pub fn eval_expression_list(env: &Env, vals: Vec<LispVal>) -> LispResult<Vec<LispVal>> {
     vals.iter()
         .map(|val| eval(env, val))
         .collect::<Result<Vec<LispVal>, LispError>>()
 }
 
+fn apply(function: LispVal, args: Vec<LispVal>) -> LispResult<LispVal> {
+    match function {
+        LispVal::PrimitiveFunc(function) => {
+            function.apply(args)
+        }
+        LispVal::Func(function) => {
+            // TODO: Check arg lengths...
+            // TODO: check varargs?
+            let mut bindings = HashMap::new();
+            for (param, value) in function.params.iter().zip(args) {
+                bindings.insert(param.to_owned(), value);
+            }
+            let env = bind_vars(&function.closure, bindings);
+
+            let body = function.body
+                .iter()
+                .map(|expr|
+                    eval(&env, expr)
+                )
+                .collect::<Result<Vec<LispVal>, LispError>>()?;
+
+            Ok(body.last().cloned().unwrap_or(LispVal::Void))
+        }
+        _ => {
+            Err(LispError::GenericError(
+                format!(
+                    "application: not a procedure; expected a procedure that can be applied to arguments; given: {}",
+                    function,
+            )))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::eval::util::{get_heads, get_tails};
+
     use super::*;
     use std::rc::Rc;
 
