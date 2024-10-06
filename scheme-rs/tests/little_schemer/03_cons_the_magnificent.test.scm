@@ -1,5 +1,5 @@
 ;; TODO - Import test function
-(define (test a b) (eq? a b))
+(define (test a b) (equal? a b))
 
 (define (rember a l)
   (cond

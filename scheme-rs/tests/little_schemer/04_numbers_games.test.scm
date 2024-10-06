@@ -1,4 +1,4 @@
-(define (test a b) (eq? a b))
+(define (test a b) (equal? a b))
 
 (define (add1 n) (+ n 1))
 (define (sub1 n) (- n 1))

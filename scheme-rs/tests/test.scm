@@ -1,4 +1,4 @@
-(define (test a b) (eq? a b))
+(define (test a b) (equal? a b))
 ; ;; TEST STUFF
 ; (define (double n) (* n 2))
 ; ;ksdhksjhdsk
