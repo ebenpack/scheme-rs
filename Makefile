@@ -21,7 +21,7 @@ cargo-build:
 	cargo build
 
 .PHONY: wasm_build
-wasm_build:
+wasm_build: clean
 	npx wasm-pack build --release
 
 .PHONY: web
@@ -41,7 +41,7 @@ npm-package: wasm_build
 	rm pkg/.gitignore
 	git -C pkg/ add .
 	git -C pkg/ commit -m "New build - $(shell date "+%Y-%m-%d %H:%M:%S")"
-	git -C pkg/ push --set-upstream origin build
+	git -C pkg/ push --force --set-upstream origin build
 
 .PHONY: serve
 serve:
