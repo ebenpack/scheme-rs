@@ -7,7 +7,7 @@ use nom::{
     character::complete::{
         char, digit0, digit1, hex_digit0, hex_digit1, none_of, oct_digit0, oct_digit1, one_of,
     },
-    combinator::{fail, opt, peek},
+    combinator::{opt, peek},
     multi::{many0, many1},
     sequence::{preceded, separated_pair, tuple},
     IResult, Parser,
