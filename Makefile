@@ -4,6 +4,7 @@ default: web
 clean-www:
 	rm -rf www/dist
 	rm -rf www/node_modules
+	rm -rf npm-build
 
 .PHONY: clean-rs
 clean-rs:
@@ -18,10 +19,10 @@ test:
 
 .PHONY: cargo-build
 cargo-build:
-	cargo build
+	cargo build --workspace --release
 
 .PHONY: wasm_build
-wasm_build: clean
+wasm_build: clean cargo-build
 	npx wasm-pack build --release
 
 .PHONY: web
@@ -33,15 +34,18 @@ web: wasm_build
 .PHONY: npm-package
 npm-package: wasm_build
 	$(eval current_git_url := $(shell git ls-remote --get-url origin))
-	git init pkg/
-	git -C pkg/ config remote.origin.url >&- || git -C pkg/ remote add origin ${current_git_url}
-	git -C pkg/ checkout build || git -C pkg/ checkout --orphan build
+	mkdir -p npm-build
+	git init npm-build/
+	git -C npm-build/ remote add origin ${current_git_url}
+	git -C npm-build/ fetch
+	git -C npm-build/ checkout build
+	cp -a pkg/. npm-build/
 	# wasm-pack creates a gitignore with `*`. We want to upload the contents
 	# to our build branch, and we already ignore pkg/ so we'll delete this.
-	rm pkg/.gitignore
-	git -C pkg/ add .
-	git -C pkg/ commit -m "New build - $(shell date "+%Y-%m-%d %H:%M:%S")"
-	git -C pkg/ push --force --set-upstream origin build
+	rm npm-build/.gitignore
+	git -C npm-build/ add .
+	git -C npm-build/ commit -m "New build - $(shell date "+%Y-%m-%d %H:%M:%S")"
+	git -C npm-build/ push --set-upstream origin build
 
 .PHONY: serve
 serve:
