@@ -8,6 +8,10 @@ use crate::lisp_val::LispVal;
 use crate::primitive_functions::util::check_arity;
 use crate::primitive_functions::util::mk_prim_fn_binding;
 
+fn vector(args: Vec<LispVal>) -> LispResult<LispVal> {
+    Ok(LispVal::Vector(Rc::new(args)))
+}
+
 fn is_vector(args: Vec<LispVal>) -> LispResult<LispVal> {
     check_arity(&args, Arity::MinMax(1, 1))?;
     match args[..] {
@@ -82,6 +86,7 @@ fn make_vector(args: Vec<LispVal>) -> LispResult<LispVal> {
 
 pub fn vector_primitives() -> Bindings {
     HashMap::from([
+        mk_prim_fn_binding("vector", vector),
         mk_prim_fn_binding("vector?", is_vector),
         mk_prim_fn_binding("vector-length", vector_length),
         mk_prim_fn_binding("vector-ref", vector_ref),
