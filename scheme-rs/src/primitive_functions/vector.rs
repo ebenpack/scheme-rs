@@ -38,7 +38,7 @@ fn vector_ref(args: Vec<LispVal>) -> LispResult<LispVal> {
         [v @ LispVal::Vector(xs), LispVal::Integer(n)] => {
             let index = usize::try_from(*n)
                 .map_err(|_| LispError::GenericError("weird list length".to_string()))?;
-            match xs.get(index ) {
+            match xs.get(index) {
                 Some(val) => Ok(val.clone()),
                 None => Err(LispError::GenericError(format!("vector-ref: index is out of range\nindex: {}\nvalid range: [0, {}]\nvector: {}", index, xs.len(), v))),
             }
