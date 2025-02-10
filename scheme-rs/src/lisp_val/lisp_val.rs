@@ -94,6 +94,10 @@ pub enum LispVal {
     PrimitiveFunc(PrimitiveFunc),
     Func(Func),
     Bool(bool),
+    Quote(Rc<LispVal>),
+    QuasiQuote(Rc<LispVal>),
+    Unquote(Rc<LispVal>),
+    UnquoteSplicing(Rc<LispVal>),
     Nil,
     Void,
 }
@@ -149,6 +153,10 @@ impl fmt::Display for LispVal {
                 LispVal::Nil => "Nil".to_owned(),
                 LispVal::Bool(true) => "#t".to_owned(),
                 LispVal::Bool(false) => "#f".to_owned(),
+                LispVal::Quote(v) => format!("'{}", v),
+                LispVal::QuasiQuote(v) => format!("`{}", v),
+                LispVal::UnquoteSplicing(v) => format!(",@{}", v),
+                LispVal::Unquote(v) => format!(",{}", v),
                 LispVal::Void => "".to_owned(),
             }
         }

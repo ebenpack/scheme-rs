@@ -757,14 +757,11 @@ fn parse_quoted() {
         quoted("'(1 2 3)"),
         Ok((
             "",
-            LispVal::List(Rc::new(vec![
-                LispVal::Atom("quote".to_string()),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Integer(1),
-                    LispVal::Integer(2),
-                    LispVal::Integer(3),
-                ]))
-            ]))
+            LispVal::Quote(Rc::new(LispVal::List(Rc::new(vec![
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
+            ]))))
         ))
     )
 }
@@ -775,14 +772,23 @@ fn parse_unquoted() {
         unquoted(",(1 2 3)"),
         Ok((
             "",
-            LispVal::List(Rc::new(vec![
-                LispVal::Atom("unquote".to_string()),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Integer(1),
-                    LispVal::Integer(2),
-                    LispVal::Integer(3),
-                ]))
-            ]))
+            LispVal::Unquote(Rc::new(LispVal::List(Rc::new(vec![
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
+            ]))))
+        ))
+    );
+    assert_eq!(
+        expression("(,x . ,x)"),
+        Ok((
+            "",
+            LispVal::DottedList(
+                Rc::new(vec![LispVal::Unquote(Rc::new(LispVal::Atom(
+                    "x".to_string()
+                )))]),
+                Rc::new(LispVal::Unquote(Rc::new(LispVal::Atom("x".to_string()))))
+            )
         ))
     )
 }
@@ -792,14 +798,11 @@ fn parse_quasi_quote() {
         quasi_quote("`(1 2 3)"),
         Ok((
             "",
-            LispVal::List(Rc::new(vec![
-                LispVal::Atom("quasiquote".to_string()),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Integer(1),
-                    LispVal::Integer(2),
-                    LispVal::Integer(3),
-                ]))
-            ]))
+            LispVal::QuasiQuote(Rc::new(LispVal::List(Rc::new(vec![
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
+            ]))))
         ))
     )
 }
@@ -809,14 +812,11 @@ fn parse_unquote_splicing() {
         unquote_splicing(",@(1 2 3)"),
         Ok((
             "",
-            LispVal::List(Rc::new(vec![
-                LispVal::Atom("unquote-splicing".to_string()),
-                LispVal::List(Rc::new(vec![
-                    LispVal::Integer(1),
-                    LispVal::Integer(2),
-                    LispVal::Integer(3),
-                ]))
-            ]))
+            LispVal::UnquoteSplicing(Rc::new(LispVal::List(Rc::new(vec![
+                LispVal::Integer(1),
+                LispVal::Integer(2),
+                LispVal::Integer(3),
+            ]))))
         ))
     )
 }

@@ -113,6 +113,22 @@ mod tests {
     }
 
     #[test]
+    fn test_quasiquotes() {
+        let t = Thingus::new(Box::new(noop));
+        assert_eq!(t.eval("`(1 2 3 4 ,(+ 2 3))"), "(1 2 3 4 5)");
+
+        assert_eq!(t.eval("`(1 2 3 4 ,(+ 2 3))"), "(1 2 3 4 5)");
+        assert_eq!(
+            t.eval("(define bar 7) `(1 2 3 (4 5 (6 ,bar)))"),
+            "(1 2 3 (4 5 (6 7)))"
+        );
+        assert_eq!(t.eval("(define x 1) `((,x . ,x) . ,x)"), "((1 . 1) . 1)");
+
+        // Multi-level quasiquoting isn't currently working
+        // assert_eq!(t.eval("(define baz 1) ``(,baz . 2)"), "(baz . 2)");
+    }
+
+    #[test]
     fn function_equality() {
         let t = Thingus::new(Box::new(noop));
 
@@ -162,9 +178,13 @@ mod tests {
             .map_err(|_| "Error reading test file to string")?;
 
         let t = Thingus::new(Box::new(noop));
-        let results = t
-            .eval_blah(&file)
-            .map_err(|err| format!("Error evaluating test file: {}", err))?;
+        let results = t.eval_blah(&file).map_err(|err| {
+            format!(
+                "Error evaluating test file in {:?}: {}",
+                test_path.file_name(),
+                err
+            )
+        })?;
 
         // Kind of a hack for now, but the last expression of the test file will be 'OK
         // and we'll assert this to ensure we've parsed the entire file successfully

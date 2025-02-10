@@ -236,39 +236,24 @@ pub fn vector(input: &str) -> IResult<&str, LispVal> {
 
 pub fn quoted(input: &str) -> IResult<&str, LispVal> {
     let (input, (_, q)) = tuple((char('\''), expression)).parse(input)?;
-    Ok((
-        input,
-        LispVal::List(Rc::new(vec![LispVal::Atom("quote".to_string()), q])),
-    ))
+    Ok((input, LispVal::Quote(Rc::new(q))))
 }
 
 pub fn quasi_quote(input: &str) -> IResult<&str, LispVal> {
     let (input, (_, q)) = tuple((char('`'), expression)).parse(input)?;
-    Ok((
-        input,
-        LispVal::List(Rc::new(vec![LispVal::Atom("quasiquote".to_string()), q])),
-    ))
+    Ok((input, LispVal::QuasiQuote(Rc::new(q))))
 }
 
 pub fn unquoted(input: &str) -> IResult<&str, LispVal> {
     // TODO try?
     let (input, (_, q)) = tuple((char(','), expression)).parse(input)?;
-    Ok((
-        input,
-        LispVal::List(Rc::new(vec![LispVal::Atom("unquote".to_string()), q])),
-    ))
+    Ok((input, LispVal::Unquote(Rc::new(q))))
 }
 
 pub fn unquote_splicing(input: &str) -> IResult<&str, LispVal> {
     // TODO try?
     let (input, (_, q)) = tuple((tag(",@"), expression)).parse(input)?;
-    Ok((
-        input,
-        LispVal::List(Rc::new(vec![
-            LispVal::Atom("unquote-splicing".to_string()),
-            q,
-        ])),
-    ))
+    Ok((input, LispVal::UnquoteSplicing(Rc::new(q))))
 }
 
 pub fn raw_list(input: &str) -> IResult<&str, Vec<LispVal>> {

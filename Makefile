@@ -30,7 +30,6 @@ web: wasm_build
 	yarn --cwd www install --frozen-lockfile
 	yarn --cwd www build
 
-
 .PHONY: npm-package
 npm-package: wasm_build
 	$(eval current_git_url := $(shell git ls-remote --get-url origin))
