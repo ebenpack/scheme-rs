@@ -14,8 +14,8 @@ default = ["console_error_panic_hook", "wee_alloc"]
 members = ["scheme-rs"]
 
 [dependencies]
-js-sys = "0.3.55"
-wasm-bindgen = "0.2.78"
+js-sys = "0.3.77"
+wasm-bindgen = "0.2.100"
 scheme-rs = { path = "scheme-rs" }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -38,3 +38,7 @@ opt-level = "s"
 lto = true
 codegen-units = 1
 panic = "abort"
+
+[profile.profiling]
+inherits = "release"
+debug = 1
