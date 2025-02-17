@@ -1,6 +1,7 @@
 extern crate nom;
 
 use std::rc::Rc;
+use std::sync::LazyLock;
 
 use crate::lisp_val::LispVal;
 
@@ -12,7 +13,7 @@ use nom::{
     error::ParseError,
     multi::{many0, many1, separated_list0},
     sequence::{delimited, terminated, tuple},
-    Err, IResult, InputLength, Parser,
+    Err, IResult, Parser,
 };
 
 pub use super::parse_number::number;
@@ -41,22 +42,13 @@ pub fn match_bracket(open: char) -> impl FnMut(&str) -> IResult<&str, char> {
     }
 }
 
-fn end_by<I, O1, O2, E, F, G>(mut p: F, mut sep: G) -> impl FnMut(I) -> IResult<I, Vec<O1>, E>
+fn end_by<'a, O1, O2, E, F, G>(p: F, sep: G) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<O1>, E>
 where
-    I: Clone + InputLength,
-    F: Parser<I, O1, E>,
-    G: Parser<I, O2, E>,
-    E: ParseError<I>,
+    F: Parser<&'a str, O1, E>,
+    G: Parser<&'a str, O2, E>,
+    E: ParseError<&'a str>,
 {
-    let mut helper = move |input: I| -> IResult<I, O1, E> {
-        let (input, x) = p.parse(input)?;
-        let (input, _) = sep.parse(input)?;
-        Ok((input, x))
-    };
-    move |input: I| {
-        let (input, x) = many0(&mut helper).parse(input)?;
-        Ok((input, x))
-    }
+    many0(terminated(p, sep))
 }
 
 pub fn bracketed<'i, O, E: ParseError<&'i str>, F>(
@@ -152,12 +144,10 @@ pub fn line_comment(input: &str) -> IResult<&str, ()> {
     Ok((input, ()))
 }
 
-pub fn take_until_unmatched(
-    opening_bracket: &str,
-    closing_bracket: &str,
-) -> impl Fn(&str) -> IResult<&str, &str> {
-    let opening_bracket = opening_bracket.to_string();
-    let closing_bracket = closing_bracket.to_string();
+pub fn take_until_unmatched<'a>(
+    opening_bracket: &'a str,
+    closing_bracket: &'a str,
+) -> impl Fn(&'a str) -> IResult<&str, &str> {
     enum Match {
         OpeningBracket(usize),
         ClosingBracket(usize),
@@ -179,7 +169,7 @@ pub fn take_until_unmatched(
     move |i: &str| {
         let mut index = 0;
         let mut bracket_counter = 0;
-        while let Some(m) = find(&i[index..], &opening_bracket, &closing_bracket) {
+        while let Some(m) = find(&i[index..], opening_bracket, closing_bracket) {
             match m {
                 Match::OpeningBracket(n) => {
                     bracket_counter += 1;
@@ -340,8 +330,8 @@ pub fn lists(input: &str) -> IResult<&str, LispVal> {
 
 pub fn expression(input: &str) -> IResult<&str, LispVal> {
     alt((
-        vector,
         lists,
+        vector,
         comment,
         number,
         character,
@@ -356,5 +346,6 @@ pub fn expression(input: &str) -> IResult<&str, LispVal> {
 }
 
 pub fn expression_list(input: &str) -> IResult<&str, Vec<LispVal>> {
+    let (input, _) = multispace0.parse(input)?;
     end_by(expression, multispace0).parse(input)
 }
