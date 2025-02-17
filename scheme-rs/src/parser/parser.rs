@@ -348,7 +348,31 @@ pub fn two_dotted_list(input: &str) -> IResult<&str, LispVal> {
 }
 
 pub fn lists(input: &str) -> IResult<&str, LispVal> {
-    bracketed(alt((two_dotted_list, dotted_list, list))).parse(input)
+    // N.B. We're kind of semi-re-implementing part of `bracketed` here
+    // but this allows us to significantly optimize list parsing
+
+    let (input, _) = multispace0.parse(input)?;
+    // Get the opening bracket
+    let (temp_input, open) = alt((char('('), char('['), char('{')))(input)?;
+    // Use that to get the matching closing bracket
+    let (_temp_input, closing) = matching_bracket(temp_input, open)?;
+    // Break off just the string between open & close
+    let (_remaining, to_parse) =
+        take_until_unmatched(open.to_string().as_str(), closing.to_string().as_str())(temp_input)?;
+
+    // If it seems like we have a dotted list (i.e. there is a dot somewhere within the
+    // current list-candidate-input), then we'll parse for dotted lists,
+    // which would otherwise normally result in a good bit of wasted effort.
+    //
+    // IOW we won't waste time parsing for dotted lists if we're certain we're
+    // not working with a dotted list.
+    let (input, result) = if to_parse.contains(" . ") {
+        bracketed(alt((two_dotted_list, dotted_list, list))).parse(input)?
+    // The optimized path is to parse this as a normal, un-dotted list
+    } else {
+        bracketed(list).parse(input)?
+    };
+    Ok((input, result))
 }
 
 pub fn expression(input: &str) -> IResult<&str, LispVal> {
