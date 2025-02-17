@@ -29,15 +29,20 @@ pub fn symbol(input: &str) -> IResult<&str, char> {
     one_of("!#$%&|*+-/:<=>?@^_~")(input)
 }
 
+fn matching_bracket(input: &str, open: char) -> IResult<&str, char> {
+    let p = match open {
+        '(' => ')',
+        '[' => ']',
+        '{' => '}',
+        _ => return fail(input),
+    };
+    Ok((input, p))
+}
+
 pub fn match_bracket(open: char) -> impl FnMut(&str) -> IResult<&str, char> {
     move |input| {
-        let p = match open {
-            '(' => char(')'),
-            '[' => char(']'),
-            '{' => char('}'),
-            _ => return fail(input),
-        };
-        p(input)
+        let (input, p) = matching_bracket(input, open)?;
+        char(p)(input)
     }
 }
 
