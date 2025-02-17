@@ -30,6 +30,11 @@ web: wasm_build
 	yarn --cwd www install --frozen-lockfile
 	yarn --cwd www build
 
+.PHONY: profile
+profile:
+	cargo build --workspace  --profile profiling
+	samply ./target/profiling/scheme-rs-wasm ~/Desktop/micro-kanren-test.scm                                                                 ─╯
+
 .PHONY: npm-package
 npm-package: wasm_build
 	$(eval current_git_url := $(shell git ls-remote --get-url origin))
