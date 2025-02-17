@@ -148,32 +148,51 @@ pub fn line_comment(input: &str) -> IResult<&str, ()> {
     Ok((input, ()))
 }
 
-pub fn take_until_unmatched<'a>(
-    opening_bracket: &'a str,
-    closing_bracket: &'a str,
-) -> impl Fn(&'a str) -> IResult<&str, &str> {
+pub fn take_until_unmatched(
+    opening_bracket: &str,
+    closing_bracket: &str,
+) -> impl Fn(&str) -> IResult<&str, &str> {
+    #[derive(Clone)]
     enum Match {
         OpeningBracket(usize),
         ClosingBracket(usize),
         Escape(usize),
     }
-    fn find(s: &str, opening_bracket: &str, closing_bracket: &str) -> Option<Match> {
+    impl Match {
+        fn index(&self) -> usize {
+            match self {
+                Match::OpeningBracket(s) => *s,
+                Match::ClosingBracket(s) => *s,
+                Match::Escape(s) => *s,
+            }
+        }
+    }
+    fn find_next(s: &str, opening_bracket: &str, closing_bracket: &str) -> Option<Match> {
+        let mut possible_matches = vec![];
         if let Some(s) = s.find(opening_bracket) {
-            return Some(Match::OpeningBracket(s));
+            possible_matches.push(Match::OpeningBracket(s));
         };
         if let Some(s) = s.find(closing_bracket) {
-            return Some(Match::ClosingBracket(s));
+            possible_matches.push(Match::ClosingBracket(s));
         };
         if let Some(s) = s.find('\\') {
-            return Some(Match::Escape(s));
+            possible_matches.push(Match::Escape(s));
         }
-        None
+        let least = possible_matches.iter().min_by(|x, y| {
+            let x_index = x.index();
+            let y_index = y.index();
+            x_index.cmp(&y_index)
+        });
+        least.cloned()
     }
+
+    let opening_bracket = opening_bracket.to_string();
+    let closing_bracket = closing_bracket.to_string();
 
     move |i: &str| {
         let mut index = 0;
         let mut bracket_counter = 0;
-        while let Some(m) = find(&i[index..], opening_bracket, closing_bracket) {
+        while let Some(m) = find_next(&i[index..], &opening_bracket, &closing_bracket) {
             match m {
                 Match::OpeningBracket(n) => {
                     bracket_counter += 1;
