@@ -124,8 +124,8 @@ mod tests {
         );
         assert_eq!(t.eval("(define x 1) `((,x . ,x) . ,x)"), "((1 . 1) . 1)");
 
-        // Multi-level quasiquoting isn't currently working
-        // assert_eq!(t.eval("(define baz 1) ``(,baz . 2)"), "(baz . 2)");
+        // Multi-level quasiquoting
+        assert_eq!(t.eval("(define baz 1) ``(,baz . 2)"), "`(,baz . 2)");
     }
 
     #[test]
