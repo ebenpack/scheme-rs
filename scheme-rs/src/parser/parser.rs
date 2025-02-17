@@ -1,7 +1,6 @@
 extern crate nom;
 
 use std::rc::Rc;
-use std::sync::LazyLock;
 
 use crate::lisp_val::LispVal;
 
